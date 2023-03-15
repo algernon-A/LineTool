@@ -58,7 +58,13 @@ namespace LineTool.Modes
                 return false;
             }
 
-            // If we got here, we've got both a valid starting and elbow point; place the items on the curve.
+            // If we got here, then we're placing.
+            // Calculate new start and elbow points based on second leg.
+            Vector3 difference = location - _elbowPoint;
+            m_startPos = location;
+            _elbowPoint = location + difference;
+
+            // Place the items on the curve.
             return true;
         }
 
@@ -166,8 +172,6 @@ namespace LineTool.Modes
             // Twelve iteration maximum for performance and to prevent infinite loops.
             for (int i = 0; i < 12; ++i)
             {
-                AlgernonCommons.Logging.KeyMessage("iteration ", i);
-
                 // Stop looping if the remaining distance is less than tolerance.
                 float remainingDistance = spacing - usedDistance;
                 if (remainingDistance * remainingDistance < ToleranceSquared)
