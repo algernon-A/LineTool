@@ -72,9 +72,16 @@ namespace LineTool.Modes
                 Vector3 thisPoint = new Vector3(m_startPos.x + xPos, m_startPos.y, m_startPos.z + yPos);
 
                 // Calculate rotation.
-                if (rotationMode == RotationMode.Relative)
+                switch (rotationMode)
                 {
-                    rotation = Mathf.Atan2(yPos, xPos);
+                    case RotationMode.Relative:
+                    case RotationMode.FenceAlignedZ:
+                        rotation = Mathf.Atan2(yPos, xPos);
+                        break;
+
+                    case RotationMode.FenceAlignedX:
+                        rotation = Mathf.Atan2(yPos, xPos) - (Mathf.PI / 2f);
+                        break;
                 }
 
                 // Get terrain height.

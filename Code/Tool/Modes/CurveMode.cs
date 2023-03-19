@@ -99,18 +99,44 @@ namespace LineTool.Modes
 
             // Calculate points along bezier.
             float tFactor = 0f;
-            while (tFactor <= 1.0f)
+            if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
             {
-                Vector3 thisPoint = _thisBezier.Position(tFactor);
+                // Fence mode.
+                while (tFactor <= 1.0f)
+                {
+                    // Get start and endpoints of this fence segment.
+                    Vector3 startPoint = _thisBezier.Position(tFactor);
+                    tFactor = BezierStep(tFactor, spacing);
+                    Vector3 endPoint = _thisBezier.Position(tFactor);
 
-                // Get terrain height.
-                thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
+                    // Calculate rotation angle.
+                    Vector3 difference = endPoint - startPoint;
+                    float rotation = Mathf.Atan2(difference.z, difference.x);
 
-                // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = 0f });
+                    // Calculate midpoint (prop placement point) and get terrain height.
+                    Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
+                    midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
 
-                // Get next point.
-                tFactor = BezierStep(tFactor, spacing);
+                    // Add point to list.
+                    pointList.Add(new PointData { Position = midPoint, Rotation = rotation });
+                }
+            }
+            else
+            {
+                // Non-fence mode.
+                while (tFactor <= 1.0f)
+                {
+                    Vector3 thisPoint = _thisBezier.Position(tFactor);
+
+                    // Get terrain height.
+                    thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
+
+                    // Add point to list.
+                    pointList.Add(new PointData { Position = thisPoint, Rotation = 0f });
+
+                    // Get next point.
+                    tFactor = BezierStep(tFactor, spacing);
+                }
             }
         }
 

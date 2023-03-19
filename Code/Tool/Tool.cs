@@ -44,6 +44,16 @@ namespace LineTool
             /// Random rotation.
             /// </summary>
             Random,
+
+            /// <summary>
+            /// Fence mode, aligned to X-axis.
+            /// </summary>
+            FenceAlignedX,
+
+            /// <summary>
+            /// Fence mode, aligned to Z-axis.
+            /// </summary>
+            FenceAlignedZ,
         }
 
         /// <summary>
@@ -55,6 +65,11 @@ namespace LineTool
         /// Gets or sets the current tool mode.
         /// </summary>
         public ToolMode CurrentMode { get; set; } = new LineMode();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether fence mode is active.
+        /// </summary>
+        public bool FenceMode { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the selected prefab to place.
@@ -186,8 +201,31 @@ namespace LineTool
                     // Clear list.
                     _propPoints.Clear();
 
+                    float spacing = Spacing;
+                    RotationMode rotationMode = RotationMode.Relative;
+
+                    if (FenceMode)
+                    {
+                        if (SelectedPrefab is PropInfo prop)
+                        {
+                            float xSize = prop.m_mesh.bounds.extents.x * 2f;
+                            float zSize = prop.m_mesh.bounds.extents.z * 2f;
+
+                            if (xSize > zSize)
+                            {
+                                spacing = xSize;
+                                rotationMode = RotationMode.FenceAlignedX;
+                            }
+                            else
+                            {
+                                spacing = zSize;
+                                rotationMode = RotationMode.FenceAlignedZ;
+                            }
+                        }
+                    }
+
                     // Calculate points.
-                    CurrentMode?.CalculatePoints(m_accuratePosition, Spacing, _propPoints, RotationMode.Relative);
+                    CurrentMode?.CalculatePoints(m_accuratePosition, spacing, _propPoints, rotationMode);
                 }
             }
         }

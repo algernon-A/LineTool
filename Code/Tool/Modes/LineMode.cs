@@ -57,8 +57,32 @@ namespace LineTool.Modes
             Vector3 difference = currentPos - m_startPos;
             float magnitude = difference.magnitude;
 
-            // Create points.
+            // Handle rotation mode.
+            float rotation = 0f;
+            switch (rotationMode)
+            {
+                // Align prefab X-axis to line direction.
+                case RotationMode.FenceAlignedX:
+                    rotation = Mathf.Atan2(difference.z, difference.x);
+                    break;
+
+                // Align prefab Y-axis to line direction.
+                case RotationMode.FenceAlignedZ:
+                    // Offset 90 degrees.
+                    rotation = Mathf.Atan2(difference.z, difference.x) - (Mathf.PI / 2f);
+                    break;
+            }
+
+            // Determine start position.
             float currentDistance = 0f;
+
+            // Offset start position for fence mode.
+            if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
+            {
+                currentDistance = spacing / 2f;
+            }
+
+            // Create points.
             while (currentDistance < magnitude)
             {
                 // Interpolate position.
@@ -69,7 +93,7 @@ namespace LineTool.Modes
                 thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = 0f });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = rotation });
                 currentDistance += spacing;
             }
         }

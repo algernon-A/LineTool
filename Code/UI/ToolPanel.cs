@@ -20,6 +20,7 @@ namespace LineTool
         private readonly UICheckBox _lineCheck;
         private readonly UICheckBox _circleCheck;
         private readonly UICheckBox _curveCheck;
+        private readonly UICheckBox _fenceCheck;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolPanel"/> class.
@@ -39,6 +40,7 @@ namespace LineTool
             _circleCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("CIRCLE"));
             currentY += 25f;
             _curveCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("CURVE"));
+            currentY += 40f;
 
             _lineCheck.eventCheckChanged += (c, isChecked) =>
             {
@@ -71,6 +73,14 @@ namespace LineTool
             };
 
             _lineCheck.isChecked = true;
+
+            currentY += 25f;
+            _fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
+            _fenceCheck.isChecked = Tool.Instance.FenceMode;
+            _fenceCheck.eventCheckChanged += (c, isChecked) => Tool.Instance.FenceMode = isChecked;
+
+            currentY += 25f;
+            height = currentY;
         }
 
         /// <summary>
