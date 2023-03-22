@@ -1,25 +1,23 @@
-﻿// <copyright file="Tool.cs" company="algernon (K. Algernon A. Sheppard)">
+﻿// <copyright file="LineTool.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool
+namespace LineToolMod
 {
     using System.Collections;
     using System.Collections.Generic;
-    using AlgernonCommons.Translation;
     using AlgernonCommons.UI;
     using ColossalFramework;
     using ColossalFramework.Math;
     using ColossalFramework.UI;
-    using LineTool.Modes;
-    using UnifiedUI.Helpers;
+    using LineToolMod.Modes;
     using UnityEngine;
 
     /// <summary>
     /// The line tool itslef.
     /// </summary>
-    public class Tool : DefaultTool
+    public class LineTool : DefaultTool
     {
         private readonly List<PointData> _propPoints = new List<PointData>();
         private PrefabInfo _selectedPrefab;
@@ -89,7 +87,7 @@ namespace LineTool
         /// <summary>
         /// Gets the active instance reference.
         /// </summary>
-        internal static Tool Instance => ToolsModifierControl.toolController?.gameObject?.GetComponent<Tool>();
+        internal static LineTool Instance => ToolsModifierControl.toolController?.gameObject?.GetComponent<LineTool>();
 
         /// <summary>
         /// Gets a value indicating whether the RON tool is currently active (true) or inactive (false).

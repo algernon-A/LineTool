@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool
+namespace LineToolMod
 {
     using AlgernonCommons.Patching;
     using ICities;
@@ -35,7 +35,7 @@ namespace LineTool
             base.LoadedActions(mode);
 
             // Set up line tool.
-            ToolsModifierControl.toolController.gameObject.AddComponent<Tool>();
+            ToolsModifierControl.toolController.gameObject.AddComponent<LineTool>();
         }
     }
 }

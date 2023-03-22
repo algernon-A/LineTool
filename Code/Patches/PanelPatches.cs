@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool
+namespace LineToolMod
 {
     using System;
     using System.Collections.Generic;
@@ -43,7 +43,7 @@ namespace LineTool
         /// <param name="__state">Passthrough to postifx; set to true if the LineTool is active when the target method is called.</param>
         public static void Prefix(out bool __state)
         {
-            __state = Tool.IsActiveTool;
+            __state = LineTool.IsActiveTool;
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace LineTool
                 // Only restore LineTool if a supported base tool type was selected.
                 if (newTool is PropTool || newTool is TreeTool || newTool is BuildingTool)
                 {
-                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
                 }
             }
         }

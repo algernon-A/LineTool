@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool
+namespace LineToolMod
 {
     using System.IO;
     using System.Xml.Serialization;

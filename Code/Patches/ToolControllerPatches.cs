@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool
+namespace LineToolMod
 {
     using AlgernonCommons.UI;
     using HarmonyLib;
@@ -27,7 +27,7 @@ namespace LineTool
         public static void SetToolPrefix(ToolController __instance, ToolBase tool)
         {
             // Look for activation of linetool.
-            if (tool is Tool lineTool)
+            if (tool is LineTool lineTool)
             {
                 ToolBase currentTool = __instance.CurrentTool;
 
@@ -53,17 +53,17 @@ namespace LineTool
                 // Line tool isn't activated; is the new tool one of the other supported tools?
                 if (tool is PropTool propTool)
                 {
-                    Tool.Instance.BaseTool = propTool;
+                    LineTool.Instance.BaseTool = propTool;
                     StandalonePanelManager<ToolPanel>.Create();
                 }
                 else if (tool is TreeTool treeTool)
                 {
-                    Tool.Instance.BaseTool = treeTool;
+                    LineTool.Instance.BaseTool = treeTool;
                     StandalonePanelManager<ToolPanel>.Create();
                 }
                 else if (tool is BuildingTool buildingTool)
                 {
-                    Tool.Instance.BaseTool = buildingTool;
+                    LineTool.Instance.BaseTool = buildingTool;
                     StandalonePanelManager<ToolPanel>.Create();
                 }
                 else

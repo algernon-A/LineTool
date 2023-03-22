@@ -3,12 +3,12 @@
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool
+namespace LineToolMod
 {
     using AlgernonCommons.Translation;
     using AlgernonCommons.UI;
     using ColossalFramework.UI;
-    using LineTool.Modes;
+    using LineToolMod.Modes;
     using UnityEngine;
 
     /// <summary>
@@ -32,8 +32,8 @@ namespace LineTool
 
             // Basic controls.
             BOBSlider spacingSlider = AddBOBSlider(this, Margin, currentY, PanelWidth - Margin - Margin, "SPACING", 1f, 100f, 0.1f, "Spacing");
-            spacingSlider.value = Tool.Instance.Spacing;
-            spacingSlider.eventValueChanged += (c, value) => Tool.Instance.Spacing = value;
+            spacingSlider.value = LineTool.Instance.Spacing;
+            spacingSlider.eventValueChanged += (c, value) => LineTool.Instance.Spacing = value;
 
             currentY += 40f;
             _pointCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("POINT"));
@@ -53,7 +53,7 @@ namespace LineTool
                     _lineCheck.isChecked = false;
                     _circleCheck.isChecked = false;
                     _curveCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance.BaseTool;
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance.BaseTool;
                 }
             };
 
@@ -64,8 +64,8 @@ namespace LineTool
                     _pointCheck.isChecked = false;
                     _circleCheck.isChecked = false;
                     _curveCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
-                    Tool.Instance.CurrentMode = new LineMode();
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new LineMode();
                 }
             };
 
@@ -76,8 +76,8 @@ namespace LineTool
                     _pointCheck.isChecked = false;
                     _lineCheck.isChecked = false;
                     _curveCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
-                    Tool.Instance.CurrentMode = new CircleMode();
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new CircleMode();
                 }
             };
 
@@ -88,15 +88,15 @@ namespace LineTool
                     _pointCheck.isChecked = false;
                     _lineCheck.isChecked = false;
                     _circleCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
-                    Tool.Instance.CurrentMode = new CurveMode();
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new CurveMode();
                 }
             };
 
             currentY += 25f;
             _fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
-            _fenceCheck.isChecked = Tool.Instance.FenceMode;
-            _fenceCheck.eventCheckChanged += (c, isChecked) => Tool.Instance.FenceMode = isChecked;
+            _fenceCheck.isChecked = LineTool.Instance.FenceMode;
+            _fenceCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.FenceMode = isChecked;
 
             currentY += 25f;
             height = currentY;

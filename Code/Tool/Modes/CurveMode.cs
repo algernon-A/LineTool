@@ -3,13 +3,13 @@
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
 
-namespace LineTool.Modes
+namespace LineToolMod.Modes
 {
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.Math;
     using UnityEngine;
-    using static Tool;
+    using static LineTool;
 
     /// <summary>
     /// Curved line placement mode.
