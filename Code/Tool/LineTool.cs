@@ -207,12 +207,31 @@ namespace LineToolMod
                     float spacing = Spacing;
                     RotationMode rotationMode = RotationMode.Relative;
 
+                    // Fence mode calculations.
                     if (FenceMode)
                     {
                         if (SelectedPrefab is PropInfo prop)
                         {
+                            // Prop fence mode.
                             float xSize = prop.m_mesh.bounds.extents.x * 2f;
                             float zSize = prop.m_mesh.bounds.extents.z * 2f;
+
+                            if (xSize > zSize)
+                            {
+                                spacing = xSize;
+                                rotationMode = RotationMode.FenceAlignedX;
+                            }
+                            else
+                            {
+                                spacing = zSize;
+                                rotationMode = RotationMode.FenceAlignedZ;
+                            }
+                        }
+                        else if (SelectedPrefab is BuildingInfo building)
+                        {
+                            // Building fence mode.
+                            float xSize = building.m_mesh.bounds.extents.x * 2f;
+                            float zSize = building.m_mesh.bounds.extents.z * 2f;
 
                             if (xSize > zSize)
                             {
@@ -390,6 +409,14 @@ namespace LineToolMod
                         CreateTree(tree, point.Position);
                     }
                 }
+                else if (_selectedPrefab is BuildingInfo building)
+                {
+                    // Trees - create one at each point.
+                    foreach (PointData point in _propPoints)
+                    {
+                        CreateBuilding(building, point.Position, point.Rotation);
+                    }
+                }
             }
 
             yield return 0;
@@ -439,6 +466,81 @@ namespace LineToolMod
             if (isAffordable && Singleton<TreeManager>.instance.CreateTree(out uint _, ref m_randomizer, tree, position, true))
             {
                 TreeTool.DispatchPlacementEffect(position, false);
+            }
+        }
+
+        /// <summary>
+        /// Creates a building instance.
+        /// Based on game code.
+        /// </summary>
+        /// <param name="building">Building prefab.</param>
+        /// <param name="position">Building position.</param>
+        /// <param name="angle">Bulding angle.</param>
+        private void CreateBuilding(BuildingInfo building, Vector3 position, float angle)
+        {
+            // Effective prefab (may be overwritten).
+            BuildingInfo buildingPrefab = building;
+
+            // Check construction cost.
+            bool isAffordable = true;
+            if ((Singleton<ToolManager>.instance.m_properties.m_mode & ItemClass.Availability.Game) != 0)
+            {
+                int constructionCost = buildingPrefab.GetConstructionCost();
+                isAffordable = constructionCost == 0 || constructionCost == Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Construction, constructionCost, buildingPrefab.m_class);
+            }
+
+            if (isAffordable)
+            {
+                bool buildingPlaced = false;
+
+                if (buildingPrefab.m_buildingAI.WorksAsNet())
+                {
+                    Building data = default;
+                    data.m_buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
+                    data.m_position = position;
+                    data.m_angle = angle;
+                    data.Width = buildingPrefab.m_cellWidth;
+                    data.Length = buildingPrefab.m_cellLength;
+                    BuildingDecoration.LoadPaths(buildingPrefab, 0, ref data, position.y);
+                    if (Mathf.Abs(position.y) < 1f)
+                    {
+                        BuildingDecoration.LoadProps(buildingPrefab, 0, ref data);
+                    }
+
+                    Singleton<SimulationManager>.instance.m_currentBuildIndex++;
+                    buildingPlaced = true;
+                }
+                else if (Singleton<BuildingManager>.instance.CreateBuilding(out ushort buildingID, ref Singleton<SimulationManager>.instance.m_randomizer, buildingPrefab, position, angle, 0, Singleton<SimulationManager>.instance.m_currentBuildIndex))
+                {
+                    BuildingInfo placedInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
+                    if (placedInfo != null)
+                    {
+                        buildingPrefab = placedInfo;
+                    }
+
+                    Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].m_flags |= Building.Flags.FixedHeight;
+
+                    Singleton<SimulationManager>.instance.m_currentBuildIndex++;
+                    buildingPlaced = true;
+                }
+
+                // Handle building placement.
+                if (buildingPlaced)
+                {
+                    buildingPrefab.m_notUsedGuide?.Disable();
+
+                    buildingPrefab.m_buildingAI.PlacementSucceeded();
+                    Singleton<GuideManager>.instance.m_notEnoughMoney.Deactivate();
+                    int publicServiceIndex = ItemClass.GetPublicServiceIndex(buildingPrefab.m_class.m_service);
+                    if (publicServiceIndex != -1)
+                    {
+                        Singleton<GuideManager>.instance.m_serviceNotUsed[publicServiceIndex].Disable();
+                        Singleton<GuideManager>.instance.m_serviceNeeded[publicServiceIndex].Deactivate();
+                        Singleton<CoverageManager>.instance.CoverageUpdated(buildingPrefab.m_class.m_service, buildingPrefab.m_class.m_subService, buildingPrefab.m_class.m_level);
+                    }
+
+                    BuildingTool.DispatchPlacementEffect(buildingPrefab, 0, position, angle, buildingPrefab.m_cellWidth, buildingPrefab.m_cellLength, bulldozing: false, collapsed: false);
+                }
             }
         }
 
