@@ -72,6 +72,11 @@ namespace LineTool
         public bool FenceMode { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets the base tool for this activation of the line tool.
+        /// </summary>
+        public ToolBase BaseTool { get; set; }
+
+        /// <summary>
         /// Gets or sets the selected prefab to place.
         /// </summary>
         public PrefabInfo SelectedPrefab
@@ -287,15 +292,6 @@ namespace LineTool
 
             // Load cursor.
             m_cursor = UITextures.LoadCursor("LT-Cursor.png");
-
-            // Create new UUI button.
-            UIComponent uuiButton = UUIHelpers.RegisterToolButton(
-                name: nameof(Tool),
-                groupName: null, // default group
-                tooltip: Translations.Translate("MOD_NAME"),
-                tool: this,
-                icon: UUIHelpers.LoadTexture(UUIHelpers.GetFullPath<Mod>("Resources", "LT-UUI.png")),
-                hotkeys: new UUIHotKeys { ActivationKey = ModSettings.ToolKey });
         }
 
         /// <summary>
@@ -313,20 +309,6 @@ namespace LineTool
                 ToolsModifierControl.SetTool<DefaultTool>();
                 return;
             }
-
-            // Show panel.
-            StandalonePanelManager<ToolPanel>.Create();
-        }
-
-        /// <summary>
-        /// Called by game when tool is disabled.
-        /// </summary>
-        protected override void OnDisable()
-        {
-            // Hide panel.
-            StandalonePanelManager<ToolPanel>.Panel?.Close();
-
-            base.OnDisable();
         }
 
         /// <summary>

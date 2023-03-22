@@ -17,6 +17,7 @@ namespace LineTool
     /// </summary>
     internal class ToolPanel : StandalonePanel
     {
+        private readonly UICheckBox _pointCheck;
         private readonly UICheckBox _lineCheck;
         private readonly UICheckBox _circleCheck;
         private readonly UICheckBox _curveCheck;
@@ -35,6 +36,8 @@ namespace LineTool
             spacingSlider.eventValueChanged += (c, value) => Tool.Instance.Spacing = value;
 
             currentY += 40f;
+            _pointCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("POINT"));
+            currentY += 25f;
             _lineCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STRAIGHT_LINE"));
             currentY += 25f;
             _circleCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("CIRCLE"));
@@ -42,12 +45,26 @@ namespace LineTool
             _curveCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("CURVE"));
             currentY += 40f;
 
+            _pointCheck.isChecked = true;
+            _pointCheck.eventCheckChanged += (c, isChecked) =>
+            {
+                if (isChecked)
+                {
+                    _lineCheck.isChecked = false;
+                    _circleCheck.isChecked = false;
+                    _curveCheck.isChecked = false;
+                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance.BaseTool;
+                }
+            };
+
             _lineCheck.eventCheckChanged += (c, isChecked) =>
             {
                 if (isChecked)
                 {
+                    _pointCheck.isChecked = false;
                     _circleCheck.isChecked = false;
                     _curveCheck.isChecked = false;
+                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
                     Tool.Instance.CurrentMode = new LineMode();
                 }
             };
@@ -56,8 +73,10 @@ namespace LineTool
             {
                 if (isChecked)
                 {
+                    _pointCheck.isChecked = false;
                     _lineCheck.isChecked = false;
                     _curveCheck.isChecked = false;
+                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
                     Tool.Instance.CurrentMode = new CircleMode();
                 }
             };
@@ -66,13 +85,13 @@ namespace LineTool
             {
                 if (isChecked)
                 {
+                    _pointCheck.isChecked = false;
                     _lineCheck.isChecked = false;
                     _circleCheck.isChecked = false;
+                    ToolsModifierControl.toolController.CurrentTool = Tool.Instance;
                     Tool.Instance.CurrentMode = new CurveMode();
                 }
             };
-
-            _lineCheck.isChecked = true;
 
             currentY += 25f;
             _fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));

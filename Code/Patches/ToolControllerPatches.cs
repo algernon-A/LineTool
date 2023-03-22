@@ -5,7 +5,7 @@
 
 namespace LineTool
 {
-    using AlgernonCommons;
+    using AlgernonCommons.UI;
     using HarmonyLib;
 
     /// <summary>
@@ -15,6 +15,8 @@ namespace LineTool
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Harmony")]
     public static class ToolControllerPatches
     {
+
+
         /// <summary>
         /// Harmony prefix patch to ToolController.SetTool to record selected prefab from previous tool when switching to LineTool..
         /// </summary>
@@ -31,22 +33,42 @@ namespace LineTool
 
                 if (currentTool is BuildingTool buildingTool)
                 {
-                    Logging.KeyMessage("buildingTool active; selected prefab is ", buildingTool.m_prefab?.name);
                     lineTool.SelectedPrefab = buildingTool.m_prefab;
                 }
                 else if (currentTool is PropTool propTool)
                 {
-                    Logging.KeyMessage("propTool active; selected prefab is ", propTool.m_prefab?.name);
                     lineTool.SelectedPrefab = propTool.m_prefab;
                 }
                 else if (currentTool is TreeTool treeTool)
                 {
-                    Logging.KeyMessage("treeTool active; selected prefab is ", treeTool.m_prefab?.name);
                     lineTool.SelectedPrefab = treeTool.m_prefab;
                 }
                 else
                 {
                     lineTool.SelectedPrefab = null;
+                }
+            }
+            else
+            {
+                // Line tool isn't activated; is the new tool one of the other supported tools?
+                if (tool is PropTool propTool)
+                {
+                    Tool.Instance.BaseTool = propTool;
+                    StandalonePanelManager<ToolPanel>.Create();
+                }
+                else if (tool is TreeTool treeTool)
+                {
+                    Tool.Instance.BaseTool = treeTool;
+                    StandalonePanelManager<ToolPanel>.Create();
+                }
+                else if (tool is BuildingTool buildingTool)
+                {
+                    Tool.Instance.BaseTool = buildingTool;
+                    StandalonePanelManager<ToolPanel>.Create();
+                }
+                else
+                {
+                    StandalonePanelManager<ToolPanel>.Panel?.Close();
                 }
             }
         }
