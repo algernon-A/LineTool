@@ -55,7 +55,8 @@ namespace LineToolMod.Modes
                 return false;
             }
 
-            // Second click; place items.
+            // Second click; we're placing items.  Update new starting location to the previous end point.
+            m_startPos = location;
             return true;
         }
 

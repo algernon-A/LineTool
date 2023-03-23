@@ -7,5 +7,6 @@
 "FENCEMODE","Fence mode","Mode tooltip"
 "POINT","Single","Mode tooltip"
 "STRAIGHT_LINE","Straight line","Mode tooltip"
-"CIRCLE","Circle","Mode tooltip
 "CURVE","Curve","Mode tooltip"
+"FREEFORM","Freeform","Mode tooltip"
+"CIRCLE","Circle","Mode tooltip

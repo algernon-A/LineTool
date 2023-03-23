@@ -69,6 +69,7 @@ namespace LineToolMod
             AddTabTextButton(controlTabStrip, buttonTemplate, "Single", "POINT", "•", 1.5f, 0, 1, 4, 0);
             AddTabSpriteButton(controlTabStrip, buttonTemplate, "Straight", "STRAIGHT_LINE");
             AddTabSpriteButton(controlTabStrip, buttonTemplate, "Curved", "CURVE");
+            AddTabSpriteButton(controlTabStrip, buttonTemplate, "Freeform", "FREEFORM");
             AddTabTextButton(controlTabStrip, buttonTemplate, "Circle", "CIRCLE", "○", 3.0f, -2, 1, -13, 0);
 
             // Event handler.
@@ -86,6 +87,7 @@ namespace LineToolMod
             Single,
             Line,
             Curve,
+            Freeform,
             Circle,
             NumModes,
         }
@@ -278,6 +280,11 @@ namespace LineToolMod
                 case ModeIndexes.Curve:
                     ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
                     LineTool.Instance.CurrentMode = new CurveMode();
+                    break;
+
+                case ModeIndexes.Freeform:
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new FreeformMode();
                     break;
 
                 case ModeIndexes.Circle:

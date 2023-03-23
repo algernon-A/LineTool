@@ -14,15 +14,27 @@ namespace LineToolMod.Modes
     /// <summary>
     /// Curved line placement mode.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Protected internal fields")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Protected internal fields")]
     public class CurveMode : ToolMode
     {
-        // Elbow point and bezier.
-        private Vector3 _elbowPoint;
-        private Bezier3 _thisBezier;
+        /// <summary>
+        /// Indicates whether the elbow point is currently valid.
+        /// </summary>
+        protected internal bool m_validElbow = false;
 
-        // Validity flags.
-        private bool _validElbow = false;
-        private bool _validBezier = false;
+        /// <summary>
+        /// Indicates whether the elbow point is currently valid.
+        /// </summary>
+        protected internal bool m_validBezier = false;
+
+        /// <summary>
+        /// Current elbow point.
+        /// </summary>
+        protected internal Vector3 m_elbowPoint;
+
+        // Calculated bezier.
+        private Bezier3 _thisBezier;
 
         /// <summary>
         /// Clears the current selection.
@@ -31,8 +43,8 @@ namespace LineToolMod.Modes
         {
             base.Reset();
 
-            _validElbow = false;
-            _validBezier = false;
+            m_validElbow = false;
+            m_validBezier = false;
         }
 
         /// <summary>
@@ -51,18 +63,16 @@ namespace LineToolMod.Modes
             }
 
             // Othwerwise, if no valid elbow point, record this as the elbow point.
-            if (!_validElbow)
+            if (!m_validElbow)
             {
-                _elbowPoint = location;
-                _validElbow = true;
+                m_elbowPoint = location;
+                m_validElbow = true;
                 return false;
             }
 
-            // If we got here, then we're placing.
-            // Calculate new start and elbow points based on second leg.
-            Vector3 difference = location - _elbowPoint;
+            // If we got here, then we're placing items.  Update new starting location to the previous end point and clear elbow.
             m_startPos = location;
-            _elbowPoint = location + difference;
+            m_validElbow = false;
 
             // Place the items on the curve.
             return true;
@@ -79,21 +89,21 @@ namespace LineToolMod.Modes
         public override void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
         {
             // Don't do anything if we don't have valid start and elbow points.
-            if (!(m_validStart & _validElbow))
+            if (!(m_validStart & m_validElbow))
             {
                 return;
             }
 
             // Calulate angles.
-            Vector3 direction1 = _elbowPoint - m_startPos;
+            Vector3 direction1 = m_elbowPoint - m_startPos;
             direction1.Normalize();
-            Vector3 direction2 = _elbowPoint - currentPos;
+            Vector3 direction2 = m_elbowPoint - currentPos;
             direction2.Normalize();
 
             // Create bezier.
             NetSegment.CalculateMiddlePoints(m_startPos, direction1, currentPos, direction2, false, false, out Vector3 middlePos1, out Vector3 middlePos2);
             _thisBezier = new Bezier3(m_startPos, middlePos1, middlePos2, currentPos);
-            _validBezier = true;
+            m_validBezier = true;
 
             // Local reference.
             TerrainManager terrainManager = Singleton<TerrainManager>.instance;
@@ -171,7 +181,7 @@ namespace LineToolMod.Modes
             }
 
             // Draw line guides.
-            if (!_validElbow)
+            if (!m_validElbow)
             {
                 // No elbow point yet - just draw initial line.
                 Segment3 segment = new Segment3(m_startPos, mousePosition);
@@ -181,14 +191,14 @@ namespace LineToolMod.Modes
             else
             {
                 // Valid elbow - draw both lines.
-                Segment3 segment = new Segment3(m_startPos, _elbowPoint);
-                Segment3 segment2 = new Segment3(_elbowPoint, mousePosition);
+                Segment3 segment = new Segment3(m_startPos, m_elbowPoint);
+                Segment3 segment2 = new Segment3(m_elbowPoint, mousePosition);
                 overlay.DrawSegment(cameraInfo, Color.magenta, segment, segment2, 2f, DashLength, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
 
             // Draw bezier overlay if we have a valid bezier to draw.
-            if (_validBezier)
+            if (m_validBezier)
             {
                 overlay.DrawBezier(cameraInfo, Color.magenta, _thisBezier, 2f, 0f, 0f, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
