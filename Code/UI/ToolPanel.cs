@@ -17,11 +17,8 @@ namespace LineToolMod
     /// </summary>
     internal class ToolPanel : StandalonePanel
     {
-        private readonly UICheckBox _pointCheck;
-        private readonly UICheckBox _lineCheck;
-        private readonly UICheckBox _circleCheck;
-        private readonly UICheckBox _curveCheck;
-        private readonly UICheckBox _fenceCheck;
+        // Mode button size.
+        private const float ButtonSize = 36f;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolPanel"/> class.
@@ -34,72 +31,49 @@ namespace LineToolMod
             BOBSlider spacingSlider = AddBOBSlider(this, Margin, currentY, PanelWidth - Margin - Margin, "SPACING", 1f, 100f, 0.1f, "Spacing");
             spacingSlider.value = LineTool.Instance.Spacing;
             spacingSlider.eventValueChanged += (c, value) => LineTool.Instance.Spacing = value;
-
-            currentY += 40f;
-            _pointCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("POINT"));
-            currentY += 25f;
-            _lineCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STRAIGHT_LINE"));
-            currentY += 25f;
-            _circleCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("CIRCLE"));
-            currentY += 25f;
-            _curveCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("CURVE"));
             currentY += 40f;
 
-            _pointCheck.isChecked = true;
-            _pointCheck.eventCheckChanged += (c, isChecked) =>
-            {
-                if (isChecked)
-                {
-                    _lineCheck.isChecked = false;
-                    _circleCheck.isChecked = false;
-                    _curveCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance.BaseTool;
-                }
-            };
-
-            _lineCheck.eventCheckChanged += (c, isChecked) =>
-            {
-                if (isChecked)
-                {
-                    _pointCheck.isChecked = false;
-                    _circleCheck.isChecked = false;
-                    _curveCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
-                    LineTool.Instance.CurrentMode = new LineMode();
-                }
-            };
-
-            _circleCheck.eventCheckChanged += (c, isChecked) =>
-            {
-                if (isChecked)
-                {
-                    _pointCheck.isChecked = false;
-                    _lineCheck.isChecked = false;
-                    _curveCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
-                    LineTool.Instance.CurrentMode = new CircleMode();
-                }
-            };
-
-            _curveCheck.eventCheckChanged += (c, isChecked) =>
-            {
-                if (isChecked)
-                {
-                    _pointCheck.isChecked = false;
-                    _lineCheck.isChecked = false;
-                    _circleCheck.isChecked = false;
-                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
-                    LineTool.Instance.CurrentMode = new CurveMode();
-                }
-            };
-
-            currentY += 25f;
-            _fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
-            _fenceCheck.isChecked = LineTool.Instance.FenceMode;
-            _fenceCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.FenceMode = isChecked;
+            UICheckBox fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
+            fenceCheck.isChecked = LineTool.Instance.FenceMode;
+            fenceCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.FenceMode = isChecked;
 
             currentY += 25f;
             height = currentY;
+            currentY += Margin;
+
+            // Add control tab.
+            UITabstrip controlTabStrip = AddUIComponent<UITabstrip>();
+            controlTabStrip.relativePosition = new Vector2(0f, currentY);
+            controlTabStrip.width = ButtonSize * (int)ModeIndexes.NumModes;
+            controlTabStrip.height = 36f;
+            controlTabStrip.padding.right = 0;
+
+            // Get button template.
+            UIButton buttonTemplate = GameObject.Find("ToolMode").GetComponent<UITabstrip>().GetComponentInChildren<UIButton>();
+
+            // Add buttons.
+            AddTabTextButton(controlTabStrip, buttonTemplate, "Single", "POINT", "•", 1.5f, 0, 1, 4, 0);
+            AddTabSpriteButton(controlTabStrip, buttonTemplate, "Straight", "STRAIGHT_LINE");
+            AddTabSpriteButton(controlTabStrip, buttonTemplate, "Curved", "CURVE");
+            AddTabTextButton(controlTabStrip, buttonTemplate, "Circle", "CIRCLE", "○", 3.0f, -2, 1, -13, 0);
+
+            // Event handler.
+            controlTabStrip.eventSelectedIndexChanged += TabIndexChanged;
+
+            // Set position.
+            UIComponent optionsBar = GameObject.Find("OptionsBar").GetComponent<UIComponent>();
+            absolutePosition = optionsBar.absolutePosition - new Vector3(0f, currentY);
+        }
+
+        // Tool selection indicies.
+        private enum ModeIndexes : int
+        {
+            None = -1,
+            Single,
+            Line,
+            Curve,
+            Circle,
+            NumModes,
         }
 
         /// <summary>
@@ -181,6 +155,122 @@ namespace LineToolMod
             newSlider.TrueValue = 0f;
 
             return newSlider;
+        }
+
+        /// <summary>
+        /// Appends a tab button with text to a tabstrip.
+        /// </summary>
+        /// <param name="tabstrip">Tabstrip to append to.</param>
+        /// <param name="template">Button template.</param>
+        /// <param name="name">Button name.</param>
+        /// <param name="tooltipKey">Tooltop key.</param>
+        /// <param name="displayText">Text to display.</param>
+        /// <param name="textScale">Text scale.</param>
+        /// <param name="leftPadding">Text padding (left).</param>
+        /// <param name="rightPadding">Text padding (right).</param>
+        /// <param name="topPadding">Text padding (top).</param>
+        /// <param name="bottomPadding">Text padding (button).</param>
+        private void AddTabTextButton(UITabstrip tabstrip, UIButton template, string name, string tooltipKey, string displayText, float textScale, int leftPadding, int rightPadding, int topPadding, int bottomPadding)
+        {
+            // Add basic button.
+            UIButton newButton = AddTabButton(tabstrip, template, name, tooltipKey);
+
+            // Clear sprites.
+            newButton.normalFgSprite = string.Empty;
+            newButton.focusedFgSprite = string.Empty;
+            newButton.hoveredFgSprite = string.Empty;
+            newButton.pressedFgSprite = string.Empty;
+            newButton.disabledFgSprite = string.Empty;
+
+            // Set text.
+            newButton.text = displayText;
+            newButton.textScale = textScale;
+
+            // Set text padding.
+            newButton.textPadding.left = leftPadding;
+            newButton.textPadding.right = rightPadding;
+            newButton.textPadding.top = topPadding;
+            newButton.textPadding.bottom = bottomPadding;
+
+            // Set text colour.
+            newButton.textColor = new Color32(119, 124, 126, 255);
+            newButton.hoveredTextColor = new Color32(110, 113, 114, 255);
+            newButton.pressedTextColor = new Color32(172, 175, 176, 255);
+            newButton.focusedTextColor = new Color32(187, 224, 235, 255);
+            newButton.disabledTextColor = new Color32(66, 69, 70, 255);
+        }
+
+        /// <summary>
+        /// Appends a tab button with sprite to a tabstrip.
+        /// </summary>
+        /// <param name="tabstrip">Tabstrip to append to.</param>
+        /// <param name="template">Button template.</param>
+        /// <param name="name">Button name.</param>
+        /// <param name="tooltipKey">Tooltop key.</param>
+        private void AddTabSpriteButton(UITabstrip tabstrip, UIButton template, string name, string tooltipKey)
+        {
+            // Add basic button.
+            UIButton newButton = AddTabButton(tabstrip, template, name, tooltipKey);
+
+            // Set sprites.
+            string spriteBaseName = "RoadOption" + name;
+            newButton.normalFgSprite = spriteBaseName;
+            newButton.focusedFgSprite = spriteBaseName + "Focused";
+            newButton.hoveredFgSprite = spriteBaseName + "Hovered";
+            newButton.pressedFgSprite = spriteBaseName + "Pressed";
+            newButton.disabledFgSprite = spriteBaseName + "Disabled";
+        }
+
+        /// <summary>
+        /// Appends a tab button to a tabstrip.
+        /// </summary>
+        /// <param name="tabstrip">Tabstrip to append to.</param>
+        /// <param name="template">Button template.</param>
+        /// <param name="name">Button name.</param>
+        /// <param name="tooltipKey">Tooltop key.</param>
+        /// <returns>New UIButton.</returns>
+        private UIButton AddTabButton(UITabstrip tabstrip, UIButton template, string name, string tooltipKey)
+        {
+            // Basic setup.
+            UIButton newButton = tabstrip.AddTab(name, template, false);
+            newButton.name = name;
+            newButton.autoSize = false;
+            newButton.height = ButtonSize;
+            newButton.width = ButtonSize;
+            newButton.tooltip = Translations.Translate(tooltipKey);
+
+            return newButton;
+        }
+
+        /// <summary>
+        /// Control tab index changed event handler.
+        /// </summary>
+        /// <param name="c">Calling component.</param>
+        /// <param name="index">Selected index.</param>
+        private void TabIndexChanged(UIComponent c, int index)
+        {
+            // Set current tool and/or mode based on new index.
+            switch ((ModeIndexes)index)
+            {
+                case ModeIndexes.Single:
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance.BaseTool;
+                    break;
+
+                case ModeIndexes.Line:
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new LineMode();
+                    break;
+
+                case ModeIndexes.Curve:
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new CurveMode();
+                    break;
+
+                case ModeIndexes.Circle:
+                    ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
+                    LineTool.Instance.CurrentMode = new CircleMode();
+                    break;
+            }
         }
     }
 }

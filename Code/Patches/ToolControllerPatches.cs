@@ -15,8 +15,6 @@ namespace LineToolMod
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Harmony")]
     public static class ToolControllerPatches
     {
-
-
         /// <summary>
         /// Harmony prefix patch to ToolController.SetTool to record selected prefab from previous tool when switching to LineTool..
         /// </summary>
