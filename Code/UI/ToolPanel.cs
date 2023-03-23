@@ -27,17 +27,31 @@ namespace LineToolMod
         {
             float currentY = 50f;
 
-            // Basic controls.
+            // Spacing.
             BOBSlider spacingSlider = AddBOBSlider(this, Margin, currentY, PanelWidth - Margin - Margin, "SPACING", 1f, 100f, 0.1f, "Spacing");
             spacingSlider.value = LineTool.Instance.Spacing;
             spacingSlider.eventValueChanged += (c, value) => LineTool.Instance.Spacing = value;
             currentY += 40f;
 
+            // Rotation.
+            BOBSlider rotationSlider = AddBOBSlider(this, Margin, currentY, PanelWidth - Margin - Margin, "ROTATION", 0f, 360f, 0.1f, "Rotation");
+            rotationSlider.value = LineTool.Instance.Rotation * Mathf.Rad2Deg;
+            rotationSlider.eventValueChanged += (c, value) => LineTool.Instance.Rotation = value * Mathf.Deg2Rad;
+            currentY += 40f;
+
+            // Relative rotation check..
+            UICheckBox relativeRotationCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("ROTATION_RELATIVE"));
+            relativeRotationCheck.isChecked = LineTool.Instance.RelativeRotation;
+            relativeRotationCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.RelativeRotation = isChecked;
+            currentY += 25f;
+
+            // Fence mode.
             UICheckBox fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
             fenceCheck.isChecked = LineTool.Instance.FenceMode;
             fenceCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.FenceMode = isChecked;
-
             currentY += 25f;
+
+            // Adust panel height.
             height = currentY;
             currentY += Margin;
 

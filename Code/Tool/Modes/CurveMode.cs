@@ -73,9 +73,10 @@ namespace LineToolMod.Modes
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
+        /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public override void CalculatePoints(Vector3 currentPos, float spacing, List<PointData> pointList, RotationMode rotationMode)
+        public override void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
         {
             // Don't do anything if we don't have valid start and elbow points.
             if (!(m_validStart & _validElbow))
@@ -111,14 +112,14 @@ namespace LineToolMod.Modes
 
                     // Calculate rotation angle.
                     Vector3 difference = endPoint - startPoint;
-                    float rotation = Mathf.Atan2(difference.z, difference.x);
+                    float finalRotation = Mathf.Atan2(difference.z, difference.x);
 
                     // Calculate midpoint (prop placement point) and get terrain height.
                     Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
                     midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
 
                     // Add point to list.
-                    pointList.Add(new PointData { Position = midPoint, Rotation = rotation });
+                    pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation });
                 }
             }
             else
@@ -131,8 +132,22 @@ namespace LineToolMod.Modes
                     // Get terrain height.
                     thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
 
+                    // Calculate rotation.
+                    float finalRotation = rotation;
+                    if (rotationMode == RotationMode.Relative)
+                    {
+                        // Get start and endpoints of this fence segment.
+                        Vector3 startPoint = _thisBezier.Position(tFactor);
+                        tFactor = BezierStep(tFactor, spacing);
+                        Vector3 endPoint = _thisBezier.Position(tFactor);
+
+                        // Calculate rotation angle.
+                        Vector3 difference = endPoint - startPoint;
+                        finalRotation += Mathf.Atan2(difference.z, difference.x);
+                    }
+
                     // Add point to list.
-                    pointList.Add(new PointData { Position = thisPoint, Rotation = 0f });
+                    pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation });
 
                     // Get next point.
                     tFactor = BezierStep(tFactor, spacing);

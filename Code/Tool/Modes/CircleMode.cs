@@ -40,9 +40,10 @@ namespace LineToolMod.Modes
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
+        /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public override void CalculatePoints(Vector3 currentPos, float spacing, List<PointData> pointList, RotationMode rotationMode)
+        public override void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -62,7 +63,7 @@ namespace LineToolMod.Modes
             float numPoints = Mathf.Floor(circumference / spacing);
             float increment = (Mathf.PI * 2f) / numPoints;
             float startAngle = Mathf.Atan2(difference.z, difference.x);
-            float rotation = 0f;
+            float finalRotation = rotation;
 
             // Create points.
             for (float i = startAngle; i < startAngle + (Mathf.PI * 2f); i += increment)
@@ -71,16 +72,19 @@ namespace LineToolMod.Modes
                 float yPos = magnitude * Mathf.Sin(i);
                 Vector3 thisPoint = new Vector3(m_startPos.x + xPos, m_startPos.y, m_startPos.z + yPos);
 
-                // Calculate rotation.
+                // Calculate non-absolute rotation, if applicable.
                 switch (rotationMode)
                 {
                     case RotationMode.Relative:
+                        finalRotation = Mathf.Atan2(yPos, xPos) - (Mathf.PI / 2f) + rotation;
+                        break;
+
                     case RotationMode.FenceAlignedZ:
-                        rotation = Mathf.Atan2(yPos, xPos);
+                        finalRotation = Mathf.Atan2(yPos, xPos);
                         break;
 
                     case RotationMode.FenceAlignedX:
-                        rotation = Mathf.Atan2(yPos, xPos) - (Mathf.PI / 2f);
+                        finalRotation = Mathf.Atan2(yPos, xPos) - (Mathf.PI / 2f);
                         break;
                 }
 
@@ -88,7 +92,7 @@ namespace LineToolMod.Modes
                 thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = rotation });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation });
             }
         }
     }

@@ -40,9 +40,10 @@ namespace LineToolMod.Modes
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
+        /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public override void CalculatePoints(Vector3 currentPos, float spacing, List<PointData> pointList, RotationMode rotationMode)
+        public override void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -58,18 +59,22 @@ namespace LineToolMod.Modes
             float magnitude = difference.magnitude;
 
             // Handle rotation mode.
-            float rotation = 0f;
+            float finalRotation = rotation;
             switch (rotationMode)
             {
                 // Align prefab X-axis to line direction.
+                case RotationMode.Relative:
+                    finalRotation += Mathf.Atan2(difference.z, difference.x);
+                    break;
+
                 case RotationMode.FenceAlignedX:
-                    rotation = Mathf.Atan2(difference.z, difference.x);
+                    finalRotation = Mathf.Atan2(difference.z, difference.x);
                     break;
 
                 // Align prefab Y-axis to line direction.
                 case RotationMode.FenceAlignedZ:
                     // Offset 90 degrees.
-                    rotation = Mathf.Atan2(difference.z, difference.x) - (Mathf.PI / 2f);
+                    finalRotation = Mathf.Atan2(difference.z, difference.x) - (Mathf.PI / 2f);
                     break;
             }
 
@@ -93,7 +98,7 @@ namespace LineToolMod.Modes
                 thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = rotation });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation });
                 currentDistance += spacing;
             }
         }

@@ -73,8 +73,9 @@ namespace LineToolMod.Modes
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
+        /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public abstract void CalculatePoints(Vector3 currentPos, float spacing, List<PointData> pointList, RotationMode rotationMode);
+        public abstract void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode);
     }
 }

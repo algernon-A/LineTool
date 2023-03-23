@@ -55,9 +55,14 @@ namespace LineToolMod
         }
 
         /// <summary>
-        /// Gets or sets the prop line spacing.
+        /// Gets or sets the line spacing.
         /// </summary>
         public float Spacing { get; set; } = 10f;
+
+        /// <summary>
+        /// Gets or sets the rotation setting.
+        /// </summary>
+        public float Rotation { get; set; } = 0f;
 
         /// <summary>
         /// Gets or sets the current tool mode.
@@ -73,6 +78,11 @@ namespace LineToolMod
         /// Gets or sets the base tool for this activation of the line tool.
         /// </summary>
         public ToolBase BaseTool { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether rotation is relative or absolute.
+        /// </summary>
+        public bool RelativeRotation { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the selected prefab to place.
@@ -204,10 +214,11 @@ namespace LineToolMod
                     // Clear list.
                     _propPoints.Clear();
 
+                    // Set default spacing and rotation.
                     float spacing = Spacing;
-                    RotationMode rotationMode = RotationMode.Relative;
+                    RotationMode rotationMode = RelativeRotation ? RotationMode.Relative : RotationMode.Fixed;
 
-                    // Fence mode calculations.
+                    // Fence mode calculations (overrides spacing and rotation mode).
                     if (FenceMode)
                     {
                         if (SelectedPrefab is PropInfo prop)
@@ -247,7 +258,7 @@ namespace LineToolMod
                     }
 
                     // Calculate points.
-                    CurrentMode?.CalculatePoints(m_accuratePosition, spacing, _propPoints, rotationMode);
+                    CurrentMode?.CalculatePoints(m_accuratePosition, spacing, Rotation, _propPoints, rotationMode);
                 }
             }
         }
