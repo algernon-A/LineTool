@@ -21,20 +21,27 @@ namespace LineToolMod
         /// </summary>
         public void PatchFindIt()
         {
-            // Check for enabled Find It assembly (don't try to patch disabled assembly, because that just breaks).
-            if (AssemblyUtils.GetEnabledAssembly("FindIt") is Assembly findItAsm)
+            try
             {
-                Type findItType = findItAsm.GetType("FindIt.FindIt");
-                if (findItType != null)
+                // Check for enabled Find It assembly (don't try to patch disabled assembly, because that just breaks).
+                if (AssemblyUtils.GetEnabledAssembly("FindIt") is Assembly findItAsm)
                 {
-                    Logging.Message("Find It found; patching");
-                    Harmony harmonyInstance = new Harmony(HarmonyID);
-                    MethodInfo targetMethod = AccessTools.Method(findItType, "SelectPrefab");
-                    MethodInfo prefix = AccessTools.Method(typeof(PanelPatches), nameof(PanelPatches.Prefix));
-                    MethodInfo postfix = AccessTools.Method(typeof(PanelPatches), nameof(PanelPatches.Postfix));
+                    Type findItType = findItAsm.GetType("FindIt.FindIt");
+                    if (findItType != null)
+                    {
+                        Logging.Message("Find It found; patching");
+                        Harmony harmonyInstance = new Harmony(HarmonyID);
+                        MethodInfo targetMethod = AccessTools.Method(findItType, "SelectPrefab");
+                        MethodInfo prefix = AccessTools.Method(typeof(PanelPatches), nameof(PanelPatches.Prefix));
+                        MethodInfo postfix = AccessTools.Method(typeof(PanelPatches), nameof(PanelPatches.Postfix));
 
-                    harmonyInstance.Patch(targetMethod, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
+                        harmonyInstance.Patch(targetMethod, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Logging.LogException(e, "exception patching Find It");
             }
         }
     }
