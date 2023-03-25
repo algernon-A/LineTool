@@ -10,3 +10,5 @@
 "CURVE","Curve","Mode tooltip"
 "FREEFORM","Freeform","Mode tooltip"
 "CIRCLE","Circle","Mode tooltip
+"STEP_ENABLED","Step mode","Mode tooltip"
+"STEP","Step","Single-step action button"

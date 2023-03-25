@@ -20,10 +20,6 @@ namespace LineToolMod
         // Mode button size.
         private const float ButtonSize = 36f;
 
-        // Panel components.
-        private UICheckBox _stepCheck;
-        private ushort _stepIndex;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolPanel"/> class.
         /// </summary>
@@ -50,7 +46,7 @@ namespace LineToolMod
             currentY += 25f;
 
             // Step check.
-            _stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
+            UICheckBox _stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
             _stepCheck.isChecked = LineTool.Instance.StepMode;
             _stepCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.StepMode = isChecked;
             currentY += 25f;
