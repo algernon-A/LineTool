@@ -297,24 +297,20 @@ namespace LineToolMod
         {
             base.RenderOverlay(cameraInfo);
 
-            // Render overlay only if valid data.
-            if (m_selectErrors == ToolErrors.None)
+            // Local references.
+            ToolManager toolManager = Singleton<ToolManager>.instance;
+            OverlayEffect overlay = Singleton<RenderManager>.instance.OverlayEffect;
+
+            // Render either the saved track if applicable, or a new track based on the current position.
+            CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, _validEndPos ? _endPos : m_accuratePosition);
+
+            // Point overlays.
+            lock (_propPoints)
             {
-                // Local references.
-                ToolManager toolManager = Singleton<ToolManager>.instance;
-                OverlayEffect overlay = Singleton<RenderManager>.instance.OverlayEffect;
-
-                // Render either the saved track if applicable, or a new track based on the current position.
-                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, _validEndPos ? _endPos : m_accuratePosition);
-
-                // Point overlays.
-                lock (_propPoints)
+                foreach (PointData point in _propPoints)
                 {
-                    foreach (PointData point in _propPoints)
-                    {
-                        overlay.DrawCircle(cameraInfo, Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
-                        ++toolManager.m_drawCallData.m_overlayCalls;
-                    }
+                    overlay.DrawCircle(cameraInfo, Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
+                    ++toolManager.m_drawCallData.m_overlayCalls;
                 }
             }
         }
