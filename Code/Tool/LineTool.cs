@@ -332,6 +332,20 @@ namespace LineToolMod
 
             // Increment index.
             ++_stepIndex;
+
+            // Check for completion of stepping.
+            lock (_propPoints)
+            {
+                if (_stepIndex == _propPoints.Count)
+                {
+                    // Reached the end of this line; reset values.
+                    _stepIndex = 0;
+                    _validEndPos = false;
+
+                    // Mode placement post-processing.
+                    CurrentMode.ItemsPlaced(_endPos);
+                }
+            }
         }
 
         /// <summary>
