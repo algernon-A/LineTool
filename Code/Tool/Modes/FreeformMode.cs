@@ -36,13 +36,21 @@ namespace LineToolMod.Modes
             }
 
             // If we got here, then we're placing.
+
+            // Place the items on the curve.
+            return true;
+        }
+
+        /// <summary>
+        /// Performs actions after items are placed on the current line, setting up for the next line to be set.
+        /// </summary>
+        /// <param name="location">Click world location.</param>
+        public override void ItemsPlaced(Vector3 location)
+        {
             // Calculate new start and elbow points based on second leg.
             Vector3 difference = location - m_elbowPoint;
             m_startPos = location;
             m_elbowPoint = location + difference;
-
-            // Place the items on the curve.
-            return true;
         }
     }
 }

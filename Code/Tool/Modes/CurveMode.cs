@@ -70,12 +70,19 @@ namespace LineToolMod.Modes
                 return false;
             }
 
-            // If we got here, then we're placing items.  Update new starting location to the previous end point and clear elbow.
-            m_startPos = location;
-            m_validElbow = false;
-
             // Place the items on the curve.
             return true;
+        }
+
+        /// <summary>
+        /// Performs actions after items are placed on the current line, setting up for the next line to be set.
+        /// </summary>
+        /// <param name="location">Click world location.</param>
+        public override void ItemsPlaced(Vector3 location)
+        {
+            // Update new starting location to the previous end point and clear elbow.
+            m_startPos = location;
+            m_validElbow = false;
         }
 
         /// <summary>

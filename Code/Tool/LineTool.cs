@@ -21,7 +21,13 @@ namespace LineToolMod
     {
         private readonly List<PointData> _propPoints = new List<PointData>();
         private PrefabInfo _selectedPrefab;
-        private Randomizer m_randomizer = default;
+        private Randomizer _randomizer = default;
+
+        // Stepping data.
+        private Vector3 _endPos;
+        private bool _validEndPos = false;
+        private bool _stepMode = false;
+        private int _stepIndex = 0;
 
         /// <summary>
         /// Rotation calculation mode enum.
@@ -73,6 +79,26 @@ namespace LineToolMod
         /// Gets or sets a value indicating whether fence mode is active.
         /// </summary>
         public bool FenceMode { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether step mode is active.
+        /// </summary>
+        public bool StepMode
+        {
+            get => _stepMode;
+
+            set
+            {
+                _stepMode = value;
+
+                // Clear flags if mode is being disabled.
+                if (!value)
+                {
+                    _validEndPos = false;
+                    _stepIndex = 0;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the base tool for this activation of the line tool.
@@ -205,8 +231,8 @@ namespace LineToolMod
             m_mousePosition = output.m_hitPos;
             m_selectErrors = errors;
 
-            // Calculate points if no errors.
-            if (errors == ToolErrors.None)
+            // Calculate points if no errors and no valid end position.
+            if (errors == ToolErrors.None && !_validEndPos)
             {
                 // Make threadsafe.
                 lock (_propPoints)
@@ -278,7 +304,8 @@ namespace LineToolMod
                 ToolManager toolManager = Singleton<ToolManager>.instance;
                 OverlayEffect overlay = Singleton<RenderManager>.instance.OverlayEffect;
 
-                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, m_accuratePosition);
+                // Render either the saved track if applicable, or a new track based on the current position.
+                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, _validEndPos ? _endPos : m_accuratePosition);
 
                 // Point overlays.
                 lock (_propPoints)
@@ -290,6 +317,25 @@ namespace LineToolMod
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds the next item in sequence.
+        /// </summary>
+        public void Step()
+        {
+            // Only step if data is valid.
+            if (!_validEndPos || !StepMode)
+            {
+                return;
+            }
+
+            // Place item at this point.
+            int pointIndex = _stepIndex;
+            Singleton<SimulationManager>.instance.AddAction(CreateItem(pointIndex));
+
+            // Increment index.
+            ++_stepIndex;
         }
 
         /// <summary>
@@ -383,14 +429,30 @@ namespace LineToolMod
                     // Handle click via current mode.
                     if (CurrentMode.HandleClick(m_accuratePosition))
                     {
-                        // Place items if indicated by mode.
-                        Singleton<SimulationManager>.instance.AddAction(CreateItems());
+                        // Stepping?
+                        if (StepMode)
+                        {
+                            // Step mode - save end point.
+                            _validEndPos = true;
+                            _endPos = m_accuratePosition;
+                            _stepIndex = 0;
+                        }
+                        else
+                        {
+                            // Not step mode - place all items.
+                            Singleton<SimulationManager>.instance.AddAction(CreateItems());
+
+                            // Mode placement post-processing.
+                            CurrentMode.ItemsPlaced(m_accuratePosition);
+                        }
                     }
                 }
                 else if (e.button == 1)
                 {
                     // Right-click; clear selection.
                     CurrentMode.Reset();
+                    _validEndPos = false;
+                    _stepIndex = 0;
                 }
             }
         }
@@ -422,9 +484,44 @@ namespace LineToolMod
                 }
                 else if (_selectedPrefab is BuildingInfo building)
                 {
-                    // Trees - create one at each point.
+                    // Buildings - create one at each point.
                     foreach (PointData point in _propPoints)
                     {
+                        CreateBuilding(building, point.Position, point.Rotation);
+                    }
+                }
+            }
+
+            yield return 0;
+        }
+
+        /// <summary>
+        /// Action method to create a new single item on the map.
+        /// </summary>
+        /// <param name="pointIndex">Index number of this point.</param>
+        /// <returns>Action IEnumerator yield.</returns>
+        private IEnumerator CreateItem(int pointIndex)
+        {
+            // Make threadsafe.
+            lock (_propPoints)
+            {
+                if (pointIndex < _propPoints.Count)
+                {
+                    PointData point = _propPoints[pointIndex];
+
+                    if (_selectedPrefab is PropInfo prop)
+                    {
+                        // Prop.
+                        CreateProp(prop, point.Position, point.Rotation);
+                    }
+                    else if (_selectedPrefab is TreeInfo tree)
+                    {
+                        // Tree.
+                        CreateTree(tree, point.Position);
+                    }
+                    else if (_selectedPrefab is BuildingInfo building)
+                    {
+                        // Building.
                         CreateBuilding(building, point.Position, point.Rotation);
                     }
                 }
@@ -451,7 +548,7 @@ namespace LineToolMod
             }
 
             // Create the prop.
-            if (isAffordable && Singleton<PropManager>.instance.CreateProp(out ushort _, ref m_randomizer, prop, position, rotation, true))
+            if (isAffordable && Singleton<PropManager>.instance.CreateProp(out ushort _, ref _randomizer, prop, position, rotation, true))
             {
                 PropTool.DispatchPlacementEffect(position, false);
             }
@@ -474,7 +571,7 @@ namespace LineToolMod
             }
 
             // Create the tree.
-            if (isAffordable && Singleton<TreeManager>.instance.CreateTree(out uint _, ref m_randomizer, tree, position, true))
+            if (isAffordable && Singleton<TreeManager>.instance.CreateTree(out uint _, ref _randomizer, tree, position, true))
             {
                 TreeTool.DispatchPlacementEffect(position, false);
             }

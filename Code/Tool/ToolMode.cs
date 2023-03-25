@@ -55,10 +55,28 @@ namespace LineToolMod.Modes
                 return false;
             }
 
-            // Second click; we're placing items.  Update new starting location to the previous end point.
-            m_startPos = location;
+            // Second click; we're placing items.
             return true;
         }
+
+        /// <summary>
+        /// Performs actions after items are placed on the current line, setting up for the next line to be set.
+        /// </summary>
+        /// <param name="location">Click world location.</param>
+        public virtual void ItemsPlaced(Vector3 location)
+        {
+            // Update new starting location to the previous end point.
+            m_startPos = location;
+        }
+
+        /// <summary>
+        /// Renders the overlay for this tool mode, using the calculated point list.
+        /// </summary>
+        /// <param name="cameraInfo">Current camera instance.</param>
+        /// <param name="toolManager">ToolManager instance.</param>
+        /// <param name="overlay">Overlay effect instance.</param>
+        /// <param name="pointList">Current mouse position.</param>
+        public virtual void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, List<PointData> pointList) { }
 
         /// <summary>
         /// Renders the overlay for this tool mode.

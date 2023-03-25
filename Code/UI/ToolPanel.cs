@@ -20,6 +20,10 @@ namespace LineToolMod
         // Mode button size.
         private const float ButtonSize = 36f;
 
+        // Panel components.
+        private UICheckBox _stepCheck;
+        private ushort _stepIndex;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolPanel"/> class.
         /// </summary>
@@ -39,11 +43,25 @@ namespace LineToolMod
             rotationSlider.eventValueChanged += (c, value) => LineTool.Instance.Rotation = value * Mathf.Deg2Rad;
             currentY += 40f;
 
-            // Relative rotation check..
+            // Relative rotation check.
             UICheckBox relativeRotationCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("ROTATION_RELATIVE"));
             relativeRotationCheck.isChecked = LineTool.Instance.RelativeRotation;
             relativeRotationCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.RelativeRotation = isChecked;
             currentY += 25f;
+
+            // Step check.
+            _stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
+            _stepCheck.isChecked = LineTool.Instance.StepMode;
+            _stepCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.StepMode = isChecked;
+            currentY += 25f;
+
+            // Step ubtton.
+            UIButton stepButton = UIButtons.AddEvenSmallerButton(this, Margin, currentY, Translations.Translate("STEP"), PanelWidth - Margin - Margin);
+            stepButton.eventClicked += (c, p) =>
+            {
+                LineTool.Instance.Step();
+            };
+            currentY += 30f;
 
             // Fence mode.
             UICheckBox fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
