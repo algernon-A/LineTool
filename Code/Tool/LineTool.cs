@@ -450,7 +450,13 @@ namespace LineToolMod
                         else
                         {
                             // Not step mode - place all items.
-                            Singleton<SimulationManager>.instance.AddAction(CreateItems());
+                            lock (_propPoints)
+                            {
+                                PointData[] points = new PointData[_propPoints.Count];
+                                _propPoints.CopyTo(points);
+                                PrefabInfo selectedPrefab = _selectedPrefab;
+                                Singleton<SimulationManager>.instance.AddAction(CreateItems(points, selectedPrefab));
+                            }
 
                             // Mode placement post-processing.
                             CurrentMode.ItemsPlaced(m_accuratePosition);
@@ -470,35 +476,33 @@ namespace LineToolMod
         /// <summary>
         /// Action method to create new items on the map.
         /// </summary>
+        /// <param name="points">Target point array.</param>
+        /// <param name="prefab">Prefab to place.</param>
         /// <returns>Action IEnumerator yield.</returns>
-        private IEnumerator CreateItems()
+        private IEnumerator CreateItems(PointData[] points, PrefabInfo prefab)
         {
-            // Make threadsafe.
-            lock (_propPoints)
+            if (prefab is PropInfo prop)
             {
-                if (_selectedPrefab is PropInfo prop)
+                // Props - create one at each point.
+                foreach (PointData point in points)
                 {
-                    // Props - create one at each point.
-                    foreach (PointData point in _propPoints)
-                    {
-                        CreateProp(prop, point.Position, point.Rotation);
-                    }
+                    CreateProp(prop, point.Position, point.Rotation);
                 }
-                else if (_selectedPrefab is TreeInfo tree)
+            }
+            else if (prefab is TreeInfo tree)
+            {
+                // Trees - create one at each point.
+                foreach (PointData point in points)
                 {
-                    // Trees - create one at each point.
-                    foreach (PointData point in _propPoints)
-                    {
-                        CreateTree(tree, point.Position);
-                    }
+                    CreateTree(tree, point.Position);
                 }
-                else if (_selectedPrefab is BuildingInfo building)
+            }
+            else if (prefab is BuildingInfo building)
+            {
+                // Buildings - create one at each point.
+                foreach (PointData point in points)
                 {
-                    // Buildings - create one at each point.
-                    foreach (PointData point in _propPoints)
-                    {
-                        CreateBuilding(building, point.Position, point.Rotation);
-                    }
+                    CreateBuilding(building, point.Position, point.Rotation);
                 }
             }
 
