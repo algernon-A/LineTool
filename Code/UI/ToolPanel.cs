@@ -46,9 +46,9 @@ namespace LineToolMod
             currentY += 25f;
 
             // Step check.
-            UICheckBox _stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
-            _stepCheck.isChecked = LineTool.Instance.StepMode;
-            _stepCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.StepMode = isChecked;
+            UICheckBox stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
+            stepCheck.isChecked = LineTool.Instance.StepMode;
+            stepCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.StepMode = isChecked;
             currentY += 25f;
 
             // Step ubtton.
@@ -58,12 +58,6 @@ namespace LineToolMod
                 LineTool.Instance.Step();
             };
             currentY += 30f;
-
-            // Fence mode.
-            UICheckBox fenceCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("FENCEMODE"));
-            fenceCheck.isChecked = LineTool.Instance.FenceMode;
-            fenceCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.FenceMode = isChecked;
-            currentY += 25f;
 
             // Adust panel height.
             height = currentY;
@@ -85,6 +79,16 @@ namespace LineToolMod
             AddTabSpriteButton(controlTabStrip, buttonTemplate, "Curved", "CURVE");
             AddTabSpriteButton(controlTabStrip, buttonTemplate, "Freeform", "FREEFORM");
             AddTabTextButton(controlTabStrip, buttonTemplate, "Circle", "CIRCLE", "○", 3.0f, -2, 1, -13, 0);
+
+            // Fence mode toggle.
+            UIMultiStateButton fenceModeToggle = AddToggleButton(this, "FenceMode", UITextures.CreateSpriteAtlas("FenceMode", 1024, "PLT"), "PLT_MultiState", "PLT_FenceMode");
+            fenceModeToggle.relativePosition = controlTabStrip.relativePosition + new Vector3(-36f, 0);
+            fenceModeToggle.tooltip = Translations.Translate("FENCEMODE");
+            fenceModeToggle.activeStateIndex = LineTool.Instance.FenceMode ? 1 : 0;
+            fenceModeToggle.eventActiveStateIndexChanged += (c, state) =>
+            {
+                LineTool.Instance.FenceMode = state != 0;
+            };
 
             // Event handler.
             controlTabStrip.eventSelectedIndexChanged += TabIndexChanged;
@@ -306,6 +310,89 @@ namespace LineToolMod
                     LineTool.Instance.CurrentMode = new CircleMode();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Adds a multi-state toggle button to the specified UIComponent.
+        /// </summary>
+        /// <param name="parent">Parent UIComponent</param>
+        /// <param name="name">Button name.</param>
+        /// <param name="atlas">Button atlas.</param>
+        /// <param name="backgroundPrefix">Background sprite common prefix (will be appended with "Zero" and "One" for the two states).</param>
+        /// <param name="foregroundPrefix">Foreground sprite common prefix (will be appended with "Zero" and "One" for the two states).</param>
+        /// <returns>New UIMultiStateButton.</returns>
+        private UIMultiStateButton AddToggleButton(UIComponent parent, string name, UITextureAtlas atlas, string backgroundPrefix, string foregroundPrefix)
+        {
+            // Create button.
+            UIMultiStateButton newButton = parent.AddUIComponent<UIMultiStateButton>();
+            newButton.name = name;
+            newButton.atlas = atlas;
+
+            // Get sprite sets.
+            UIMultiStateButton.SpriteSetState fgSpriteSetState = newButton.foregroundSprites;
+            UIMultiStateButton.SpriteSetState bgSpriteSetState = newButton.backgroundSprites;
+
+            // Calculate set names.
+            string bgPrefixZero = backgroundPrefix + "Zero";
+            string fgPrefixZero = foregroundPrefix + "Zero";
+            string bgPrefixOne = backgroundPrefix + "One";
+            string fgPrefixOne = foregroundPrefix + "One";
+
+            // State 0 background.
+            UIMultiStateButton.SpriteSet bgSpriteSetZero = bgSpriteSetState[0];
+            bgSpriteSetZero.normal = bgPrefixZero;
+            bgSpriteSetZero.focused = bgPrefixZero + "Focused";
+            bgSpriteSetZero.hovered = bgPrefixZero + "Hovered";
+            bgSpriteSetZero.pressed = bgPrefixZero + "Pressed";
+            bgSpriteSetZero.disabled = bgPrefixZero + "Disabled";
+
+            // State 0 foreground.
+            UIMultiStateButton.SpriteSet fgSpriteSetZero = fgSpriteSetState[0];
+            fgSpriteSetZero.normal = fgPrefixZero;
+            fgSpriteSetZero.focused = fgPrefixZero + "Focused";
+            fgSpriteSetZero.hovered = fgPrefixZero + "Hovered";
+            fgSpriteSetZero.pressed = fgPrefixZero + "Pressed";
+            fgSpriteSetZero.disabled = fgPrefixZero + "Disabled";
+
+            // Add state 1.
+            fgSpriteSetState.AddState();
+            bgSpriteSetState.AddState();
+
+            // State 1 background.
+            UIMultiStateButton.SpriteSet bgSpriteSetOne = bgSpriteSetState[1];
+            bgSpriteSetOne.normal = bgPrefixOne;
+            bgSpriteSetOne.focused = bgPrefixOne + "Focused";
+            bgSpriteSetOne.hovered = bgPrefixOne + "Hovered";
+            bgSpriteSetOne.pressed = bgPrefixOne + "Pressed";
+            bgSpriteSetOne.disabled = bgPrefixOne + "Disabled";
+
+            // State 1 foreground.
+            UIMultiStateButton.SpriteSet fgSpriteSetOne = fgSpriteSetState[1];
+            fgSpriteSetOne.normal = fgPrefixOne;
+            fgSpriteSetOne.focused = fgPrefixOne + "Focused";
+            fgSpriteSetOne.hovered = fgPrefixOne + "Hovered";
+            fgSpriteSetOne.pressed = fgPrefixOne + "Pressed";
+            fgSpriteSetOne.disabled = fgPrefixOne + "Disabled";
+
+            // Set initial state.
+            newButton.state = UIMultiStateButton.ButtonState.Normal;
+            newButton.activeStateIndex = 0;
+
+            // Size and appearance.
+            newButton.autoSize = false;
+            newButton.width = ButtonSize;
+            newButton.height = ButtonSize;
+            newButton.foregroundSpriteMode = UIForegroundSpriteMode.Scale;
+            newButton.spritePadding = new RectOffset(0, 0, 0, 0);
+            newButton.playAudioEvents = true;
+
+            // Enforce defaults.
+            newButton.canFocus = false;
+            newButton.enabled = true;
+            newButton.isInteractive = true;
+            newButton.isVisible = true;
+
+            return newButton;
         }
     }
 }
