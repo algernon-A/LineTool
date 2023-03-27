@@ -25,6 +25,7 @@ namespace LineToolMod
 
         // Stepping data.
         private Vector3 _endPos;
+        private float _originalRotation;
         private bool _validEndPos = false;
         private bool _stepMode = false;
         private int _stepIndex = 0;
@@ -451,6 +452,7 @@ namespace LineToolMod
                             // Step mode - save end point.
                             _validEndPos = true;
                             _endPos = m_accuratePosition;
+                            _originalRotation = Rotation;
                             _stepIndex = 0;
                         }
                         else
@@ -525,6 +527,9 @@ namespace LineToolMod
             // Make threadsafe.
             lock (_propPoints)
             {
+                // Check any rotation delta.
+                float rotationDelta = Rotation - _originalRotation;
+
                 if (pointIndex < _propPoints.Count)
                 {
                     PointData point = _propPoints[pointIndex];
@@ -532,7 +537,7 @@ namespace LineToolMod
                     if (_selectedPrefab is PropInfo prop)
                     {
                         // Prop.
-                        CreateProp(prop, point.Position, point.Rotation);
+                        CreateProp(prop, point.Position, point.Rotation + rotationDelta);
                     }
                     else if (_selectedPrefab is TreeInfo tree)
                     {
@@ -542,7 +547,7 @@ namespace LineToolMod
                     else if (_selectedPrefab is BuildingInfo building)
                     {
                         // Building.
-                        CreateBuilding(building, point.Position, point.Rotation);
+                        CreateBuilding(building, point.Position, point.Rotation + rotationDelta);
                     }
                 }
             }
