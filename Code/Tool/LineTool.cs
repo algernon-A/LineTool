@@ -174,6 +174,12 @@ namespace LineToolMod
         /// </summary>
         public override void SimulationStep()
         {
+            // Don't do anything if the end position is locked.
+            if (_validEndPos)
+            {
+                return;
+            }
+
             // Get base mouse ray.
             Ray mouseRay = m_mouseRay;
 
