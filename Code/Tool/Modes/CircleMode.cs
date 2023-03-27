@@ -95,5 +95,14 @@ namespace LineToolMod.Modes
                 pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation });
             }
         }
+
+        /// <summary>
+        /// Performs actions after items are placed on the current line, setting up for the next line to be set.
+        /// </summary>
+        /// <param name="location">Click world location.</param>
+        public override void ItemsPlaced(Vector3 location)
+        {
+            // Empty, to retain original start position (centre of circle).
+        }
     }
 }
