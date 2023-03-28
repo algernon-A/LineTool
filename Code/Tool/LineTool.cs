@@ -32,8 +32,11 @@ namespace LineToolMod
         private bool _stepMode = false;
         private int _stepIndex = 0;
 
+        // Building height offset modifer.
+        private float _heightOffset = 0.001f;
+
         // Building completed delegate.
-        private BuildingCompletedDelegate s_buildingCompleted;
+        private BuildingCompletedDelegate _buildingCompleted;
 
         /// <summary>
         /// Delegate to CommonBuildingAI.BuildingCompleted (open delegate).
@@ -395,10 +398,10 @@ namespace LineToolMod
             m_cursor = UITextures.LoadCursor("LT-Cursor.png");
 
             // Set the BuildingCompleted delegate if we haven't already.
-            if (s_buildingCompleted == null)
+            if (_buildingCompleted == null)
             {
-                s_buildingCompleted = AccessTools.MethodDelegate<BuildingCompletedDelegate>(AccessTools.Method(typeof(CommonBuildingAI), "BuildingCompleted"));
-                if (s_buildingCompleted == null)
+                _buildingCompleted = AccessTools.MethodDelegate<BuildingCompletedDelegate>(AccessTools.Method(typeof(CommonBuildingAI), "BuildingCompleted"));
+                if (_buildingCompleted == null)
                 {
                     Logging.Error("unable to get delegate for CommonBuildingAI.BuildingCompleted");
                 }
@@ -643,6 +646,11 @@ namespace LineToolMod
                 isAffordable = constructionCost == 0 || constructionCost == Singleton<EconomyManager>.instance.FetchResource(EconomyManager.Resource.Construction, constructionCost, buildingPrefab.m_class);
             }
 
+            // Apply height adjustment.
+            Vector3 adjustedPosition = position;
+            adjustedPosition.y += _heightOffset;
+            _heightOffset *= -1f;
+
             if (isAffordable)
             {
                 bool buildingPlaced = false;
@@ -651,12 +659,12 @@ namespace LineToolMod
                 {
                     Building data = default;
                     data.m_buildIndex = Singleton<SimulationManager>.instance.m_currentBuildIndex;
-                    data.m_position = position;
+                    data.m_position = adjustedPosition;
                     data.m_angle = angle;
                     data.Width = buildingPrefab.m_cellWidth;
                     data.Length = buildingPrefab.m_cellLength;
-                    BuildingDecoration.LoadPaths(buildingPrefab, 0, ref data, position.y);
-                    if (Mathf.Abs(position.y) < 1f)
+                    BuildingDecoration.LoadPaths(buildingPrefab, 0, ref data, adjustedPosition.y);
+                    if (Mathf.Abs(adjustedPosition.y) < 1f)
                     {
                         BuildingDecoration.LoadProps(buildingPrefab, 0, ref data);
                     }
@@ -664,7 +672,7 @@ namespace LineToolMod
                     Singleton<SimulationManager>.instance.m_currentBuildIndex++;
                     buildingPlaced = true;
                 }
-                else if (Singleton<BuildingManager>.instance.CreateBuilding(out buildingID, ref Singleton<SimulationManager>.instance.m_randomizer, buildingPrefab, position, angle, 0, Singleton<SimulationManager>.instance.m_currentBuildIndex))
+                else if (Singleton<BuildingManager>.instance.CreateBuilding(out buildingID, ref Singleton<SimulationManager>.instance.m_randomizer, buildingPrefab, adjustedPosition, angle, 0, Singleton<SimulationManager>.instance.m_currentBuildIndex))
                 {
                     BuildingInfo placedInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
                     if (placedInfo != null)
@@ -693,7 +701,7 @@ namespace LineToolMod
                         Singleton<CoverageManager>.instance.CoverageUpdated(buildingPrefab.m_class.m_service, buildingPrefab.m_class.m_subService, buildingPrefab.m_class.m_level);
                     }
 
-                    BuildingTool.DispatchPlacementEffect(buildingPrefab, 0, position, angle, buildingPrefab.m_cellWidth, buildingPrefab.m_cellLength, bulldozing: false, collapsed: false);
+                    BuildingTool.DispatchPlacementEffect(buildingPrefab, 0, adjustedPosition, angle, buildingPrefab.m_cellWidth, buildingPrefab.m_cellLength, bulldozing: false, collapsed: false);
 
                     // Instant construction.
                     // Check that we have a valid building ID.
@@ -710,7 +718,7 @@ namespace LineToolMod
                                 {
                                     // Complete construction.
                                     Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].m_frame0.m_constructState = byte.MaxValue;
-                                    s_buildingCompleted.Invoke(buildingAI, buildingID, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID]);
+                                    _buildingCompleted.Invoke(buildingAI, buildingID, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID]);
 
                                     // Have to do this manually as CommonBuildingAI.BuildingCompleted won't if construction time isn't zero.
                                     Singleton<BuildingManager>.instance.UpdateBuildingRenderer(buildingID, updateGroup: true);
