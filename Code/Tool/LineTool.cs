@@ -7,10 +7,12 @@ namespace LineToolMod
 {
     using System.Collections;
     using System.Collections.Generic;
+    using AlgernonCommons;
     using AlgernonCommons.UI;
     using ColossalFramework;
     using ColossalFramework.Math;
     using ColossalFramework.UI;
+    using HarmonyLib;
     using LineToolMod.Modes;
     using UnityEngine;
 
@@ -29,6 +31,14 @@ namespace LineToolMod
         private bool _validEndPos = false;
         private bool _stepMode = false;
         private int _stepIndex = 0;
+
+        // Building completed delegate.
+        private BuildingCompletedDelegate s_buildingCompleted;
+
+        /// <summary>
+        /// Delegate to CommonBuildingAI.BuildingCompleted (open delegate).
+        /// </summary>
+        private delegate void BuildingCompletedDelegate(CommonBuildingAI instance, ushort buildingID, ref Building buildingData);
 
         /// <summary>
         /// Rotation calculation mode enum.
@@ -383,6 +393,16 @@ namespace LineToolMod
 
             // Load cursor.
             m_cursor = UITextures.LoadCursor("LT-Cursor.png");
+
+            // Set the BuildingCompleted delegate if we haven't already.
+            if (s_buildingCompleted == null)
+            {
+                s_buildingCompleted = AccessTools.MethodDelegate<BuildingCompletedDelegate>(AccessTools.Method(typeof(CommonBuildingAI), "BuildingCompleted"));
+                if (s_buildingCompleted == null)
+                {
+                    Logging.Error("unable to get delegate for CommonBuildingAI.BuildingCompleted");
+                }
+            }
         }
 
         /// <summary>
@@ -613,6 +633,7 @@ namespace LineToolMod
         {
             // Effective prefab (may be overwritten).
             BuildingInfo buildingPrefab = building;
+            ushort buildingID = 0;
 
             // Check construction cost.
             bool isAffordable = true;
@@ -643,7 +664,7 @@ namespace LineToolMod
                     Singleton<SimulationManager>.instance.m_currentBuildIndex++;
                     buildingPlaced = true;
                 }
-                else if (Singleton<BuildingManager>.instance.CreateBuilding(out ushort buildingID, ref Singleton<SimulationManager>.instance.m_randomizer, buildingPrefab, position, angle, 0, Singleton<SimulationManager>.instance.m_currentBuildIndex))
+                else if (Singleton<BuildingManager>.instance.CreateBuilding(out buildingID, ref Singleton<SimulationManager>.instance.m_randomizer, buildingPrefab, position, angle, 0, Singleton<SimulationManager>.instance.m_currentBuildIndex))
                 {
                     BuildingInfo placedInfo = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].Info;
                     if (placedInfo != null)
@@ -673,6 +694,29 @@ namespace LineToolMod
                     }
 
                     BuildingTool.DispatchPlacementEffect(buildingPrefab, 0, position, angle, buildingPrefab.m_cellWidth, buildingPrefab.m_cellLength, bulldozing: false, collapsed: false);
+
+                    // Instant construction.
+                    // Check that we have a valid building ID.
+                    if (buildingID != 0)
+                    {
+                        // Get building AI.
+                        PrivateBuildingAI buildingAI = buildingPrefab.m_buildingAI as PrivateBuildingAI;
+
+                        // Only interested in private building AI.
+                        if (buildingAI != null)
+                        {
+                                // Check to see if construction time is greater than zero.
+                                if (buildingAI.m_constructionTime > 0)
+                                {
+                                    // Complete construction.
+                                    Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].m_frame0.m_constructState = byte.MaxValue;
+                                    s_buildingCompleted.Invoke(buildingAI, buildingID, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID]);
+
+                                    // Have to do this manually as CommonBuildingAI.BuildingCompleted won't if construction time isn't zero.
+                                    Singleton<BuildingManager>.instance.UpdateBuildingRenderer(buildingID, updateGroup: true);
+                                }
+                        }
+                    }
                 }
             }
         }
