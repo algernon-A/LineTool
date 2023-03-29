@@ -52,21 +52,21 @@ namespace LineToolMod
                 if (tool is PropTool propTool)
                 {
                     LineTool.Instance.BaseTool = propTool;
-                    StandalonePanelManager<ToolPanel>.Create();
+                    StandalonePanelManager<ToolModePanel>.Create();
                 }
                 else if (tool is TreeTool treeTool)
                 {
                     LineTool.Instance.BaseTool = treeTool;
-                    StandalonePanelManager<ToolPanel>.Create();
+                    StandalonePanelManager<ToolModePanel>.Create();
                 }
                 else if (tool is BuildingTool buildingTool)
                 {
                     LineTool.Instance.BaseTool = buildingTool;
-                    StandalonePanelManager<ToolPanel>.Create();
+                    StandalonePanelManager<ToolModePanel>.Create();
                 }
                 else
                 {
-                    StandalonePanelManager<ToolPanel>.Panel?.Close();
+                    StandalonePanelManager<ToolModePanel>.Panel?.Close();
                 }
             }
         }

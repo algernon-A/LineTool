@@ -1,4 +1,4 @@
-﻿// <copyright file="ToolPanel.cs" company="algernon (K. Algernon A. Sheppard)">
+﻿// <copyright file="ToolModePanel.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // Licensed under the MIT license. See LICENSE.txt file in the project root for full license information.
 // </copyright>
@@ -12,62 +12,27 @@ namespace LineToolMod
     using UnityEngine;
 
     /// <summary>
-    /// Control panel for the line tool.
-    /// TODO: quick-and-dirty hack only for development, not production design.
+    /// Mode selection buttons panel for the line tool.
     /// </summary>
-    internal class ToolPanel : StandalonePanel
+    internal class ToolModePanel : StandalonePanelBase
     {
         // Mode button size.
         private const float ButtonSize = 36f;
 
+        // Panel components.
+        private readonly UIMultiStateButton _optionsPanelToggle;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolPanel"/> class.
+        /// Initializes a new instance of the <see cref="ToolModePanel"/> class.
         /// </summary>
-        public ToolPanel()
+        public ToolModePanel()
         {
-            float currentY = 50f;
-
-            // Spacing.
-            BOBSlider spacingSlider = AddBOBSlider(this, Margin, currentY, PanelWidth - Margin - Margin, "SPACING", 1f, 100f, 0.1f, "Spacing");
-            spacingSlider.value = LineTool.Instance.Spacing;
-            spacingSlider.eventValueChanged += (c, value) => LineTool.Instance.Spacing = value;
-            currentY += 40f;
-
-            // Rotation.
-            BOBSlider rotationSlider = AddBOBSlider(this, Margin, currentY, PanelWidth - Margin - Margin, "ROTATION", 0f, 360f, 0.1f, "Rotation");
-            rotationSlider.value = LineTool.Instance.Rotation * Mathf.Rad2Deg;
-            rotationSlider.eventValueChanged += (c, value) => LineTool.Instance.Rotation = value * Mathf.Deg2Rad;
-            currentY += 40f;
-
-            // Relative rotation check.
-            UICheckBox relativeRotationCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("ROTATION_RELATIVE"));
-            relativeRotationCheck.isChecked = LineTool.Instance.RelativeRotation;
-            relativeRotationCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.RelativeRotation = isChecked;
-            currentY += 25f;
-
-            // Step check.
-            UICheckBox stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
-            stepCheck.isChecked = LineTool.Instance.StepMode;
-            stepCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.StepMode = isChecked;
-            currentY += 25f;
-
-            // Step ubtton.
-            UIButton stepButton = UIButtons.AddEvenSmallerButton(this, Margin, currentY, Translations.Translate("STEP"), PanelWidth - Margin - Margin);
-            stepButton.eventClicked += (c, p) =>
-            {
-                LineTool.Instance.Step();
-            };
-            currentY += 30f;
-
-            // Adust panel height.
-            height = currentY;
-            currentY += Margin;
-
-            // Add control tab.
+            // Add mode tabstrip.
+            float tabStripWidth = ButtonSize * (int)ModeIndexes.NumModes;
             UITabstrip controlTabStrip = AddUIComponent<UITabstrip>();
-            controlTabStrip.relativePosition = new Vector2(0f, currentY);
-            controlTabStrip.width = ButtonSize * (int)ModeIndexes.NumModes;
-            controlTabStrip.height = 36f;
+            controlTabStrip.relativePosition = new Vector2(-Margin, 0f);
+            controlTabStrip.width = tabStripWidth;
+            controlTabStrip.height = ButtonSize;
             controlTabStrip.padding.right = 0;
 
             // Get button template.
@@ -81,8 +46,9 @@ namespace LineToolMod
             AddTabTextButton(controlTabStrip, buttonTemplate, "Circle", "CIRCLE", "○", 3.0f, -2, 1, -13, 0);
 
             // Fence mode toggle.
-            UIMultiStateButton fenceModeToggle = AddToggleButton(this, "FenceMode", UITextures.CreateSpriteAtlas("FenceMode", 1024, "PLT"), "PLT_MultiState", "PLT_FenceMode");
-            fenceModeToggle.relativePosition = controlTabStrip.relativePosition + new Vector3(-36f, 0);
+            UITextureAtlas toggleAtlas = UITextures.CreateSpriteAtlas("LineToolToggles", 1024, "PLT");
+            UIMultiStateButton fenceModeToggle = AddToggleButton(this, "FenceMode", toggleAtlas, "PLT_MultiState", "PLT_FenceMode");
+            fenceModeToggle.relativePosition = controlTabStrip.relativePosition + new Vector3(tabStripWidth, 0f);
             fenceModeToggle.tooltip = Translations.Translate("FENCEMODE");
             fenceModeToggle.activeStateIndex = LineTool.Instance.FenceMode ? 1 : 0;
             fenceModeToggle.eventActiveStateIndexChanged += (c, state) =>
@@ -90,12 +56,25 @@ namespace LineToolMod
                 LineTool.Instance.FenceMode = state != 0;
             };
 
+            // Options panel toggle.
+            _optionsPanelToggle = AddToggleButton(this, "Options", toggleAtlas, "PLT_MultiState", "PLT_ToggleCP");
+            _optionsPanelToggle.relativePosition = fenceModeToggle.relativePosition + new Vector3(ButtonSize, 0f);
+            _optionsPanelToggle.tooltip = Translations.Translate("LINE_OPTIONS");
+            _optionsPanelToggle.eventActiveStateIndexChanged += (c, state) =>
+            {
+                if (state == 0)
+                {
+                    StandalonePanelManager<ToolOptionsPanel>.Panel?.Close();
+                }
+                else
+                {
+                    StandalonePanelManager<ToolOptionsPanel>.Create();
+                    StandalonePanelManager<ToolOptionsPanel>.Panel.EventClose += OptionsPanelClosed;
+                }
+            };
+
             // Event handler.
             controlTabStrip.eventSelectedIndexChanged += TabIndexChanged;
-
-            // Set position.
-            UIComponent optionsBar = GameObject.Find("OptionsBar").GetComponent<UIComponent>();
-            absolutePosition = optionsBar.absolutePosition - new Vector3(0f, currentY);
         }
 
         // Tool selection indicies.
@@ -113,83 +92,37 @@ namespace LineToolMod
         /// <summary>
         /// Gets the panel width.
         /// </summary>
-        public override float PanelWidth => 200f;
+        public override float PanelWidth => ButtonSize * ((int)ModeIndexes.NumModes + 2);
 
         /// <summary>
         /// Gets the panel height.
         /// </summary>
-        public override float PanelHeight => 200f;
+        public override float PanelHeight => ButtonSize;
 
         /// <summary>
-        /// Gets the panel's title.
+        /// Gets a value indicating whether the panel's previous position should be remembered after closing.
         /// </summary>
-        protected override string PanelTitle => Translations.Translate("MOD_NAME");
+        public override bool RememberPosition => false;
 
         /// <summary>
-        /// Adds a BOB slider to the specified component.
+        /// Sets a value indicating whether the options panel is currently open.
         /// </summary>
-        /// <param name="parent">Parent component.</param>
-        /// <param name="xPos">Relative X position.</param>
-        /// <param name="yPos">Relative Y position.</param>
-        /// <param name="width">Slider width.</param>
-        /// <param name="labelKey">Text label translation key.</param>
-        /// <param name="minValue">Minimum displayed value.</param>
-        /// <param name="maxValue">Maximum displayed value.</param>
-        /// <param name="stepSize">Minimum slider step size.</param>
-        /// <param name="name">Slider name.</param>
-        /// <returns>New BOBSlider.</returns>
-        protected BOBSlider AddBOBSlider(UIComponent parent, float xPos, float yPos, float width, string labelKey, float minValue, float maxValue, float stepSize, string name)
+        public bool OptionsPanelOpen { set => _optionsPanelToggle.activeStateIndex = value ? 1 : 0; }
+
+        /// <summary>
+        /// Gets the panel's default position.
+        /// </summary>
+        protected override void ApplyDefaultPosition()
         {
-            const float SliderY = 18f;
-            const float ValueY = 3f;
-            const float LabelY = -13f;
-            const float SliderHeight = 18f;
-            const float FloatTextFieldWidth = 45f;
-            const float IntTextFieldWidth = 38f;
-
-            // Slider control.
-            BOBSlider newSlider = parent.AddUIComponent<BOBSlider>();
-            newSlider.size = new Vector2(width, SliderHeight);
-            newSlider.relativePosition = new Vector2(xPos, yPos + SliderY);
-            newSlider.name = name;
-
-            // Value field - added to parent, not to slider, otherwise slider catches all input attempts.  Integer textfields (stepsize == 1) have shorter widths.
-            float textFieldWidth = stepSize == 1 ? IntTextFieldWidth : FloatTextFieldWidth;
-            UITextField valueField = UITextFields.AddTinyTextField(parent, xPos + Margin + newSlider.width - textFieldWidth, yPos + ValueY, textFieldWidth);
-
-            // Title label.
-            UILabel titleLabel = UILabels.AddLabel(newSlider, 0f, LabelY, Translations.Translate(labelKey), textScale: 0.7f);
-
-            // Autoscale tile label text, with minimum size 0.35.
-            while (titleLabel.width > newSlider.width - textFieldWidth && titleLabel.textScale > 0.35f)
-            {
-                titleLabel.textScale -= 0.05f;
-            }
-
-            // Slider track.
-            UISlicedSprite sliderSprite = newSlider.AddUIComponent<UISlicedSprite>();
-            sliderSprite.atlas = UITextures.InGameAtlas;
-            sliderSprite.spriteName = "BudgetSlider";
-            sliderSprite.size = new Vector2(newSlider.width, 9f);
-            sliderSprite.relativePosition = new Vector2(0f, 4f);
-
-            // Slider thumb.
-            UISlicedSprite sliderThumb = newSlider.AddUIComponent<UISlicedSprite>();
-            sliderThumb.atlas = UITextures.InGameAtlas;
-            sliderThumb.spriteName = "SliderBudget";
-            newSlider.thumbObject = sliderThumb;
-
-            // Set references.
-            newSlider.ValueField = valueField;
-
-            // Set initial values.
-            newSlider.StepSize = stepSize;
-            newSlider.maxValue = maxValue;
-            newSlider.minValue = minValue;
-            newSlider.TrueValue = 0f;
-
-            return newSlider;
+            // Set position.
+            UIComponent optionsBar = GameObject.Find("OptionsBar").GetComponent<UIComponent>();
+            absolutePosition = optionsBar.absolutePosition;
         }
+
+        /// <summary>
+        /// Updates the options panel button state when the options panel is closed.
+        /// </summary>
+        private void OptionsPanelClosed() => _optionsPanelToggle.activeStateIndex = 0;
 
         /// <summary>
         /// Appends a tab button with text to a tabstrip.
@@ -315,7 +248,7 @@ namespace LineToolMod
         /// <summary>
         /// Adds a multi-state toggle button to the specified UIComponent.
         /// </summary>
-        /// <param name="parent">Parent UIComponent</param>
+        /// <param name="parent">Parent UIComponent.</param>
         /// <param name="name">Button name.</param>
         /// <param name="atlas">Button atlas.</param>
         /// <param name="backgroundPrefix">Background sprite common prefix (will be appended with "Zero" and "One" for the two states).</param>
