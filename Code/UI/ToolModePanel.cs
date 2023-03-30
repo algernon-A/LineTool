@@ -75,6 +75,9 @@ namespace LineToolMod
 
             // Event handler.
             controlTabStrip.eventSelectedIndexChanged += TabIndexChanged;
+
+            // Make sure tool options panel is closed when this is closed.
+            EventClose += () => StandalonePanelManager<ToolOptionsPanel>.Panel?.Close();
         }
 
         // Tool selection indicies.
