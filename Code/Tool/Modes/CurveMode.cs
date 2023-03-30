@@ -88,12 +88,14 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
+        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public override void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
+        public override void CalculatePoints(ToolController toolController, PrefabInfo prefab, Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
         {
             // Don't do anything if we don't have valid start and elbow points.
             if (!(m_validStart & m_validElbow))
@@ -117,6 +119,7 @@ namespace LineToolMod.Modes
 
             // Calculate points along bezier.
             float tFactor = 0f;
+            toolController.BeginColliding(out ulong[] collidingSegments, out ulong[] collidingBuildings);
             if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
             {
                 // Fence mode.
@@ -136,7 +139,7 @@ namespace LineToolMod.Modes
                     midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
 
                     // Add point to list.
-                    pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation });
+                    pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
                 }
             }
             else
@@ -164,12 +167,14 @@ namespace LineToolMod.Modes
                     }
 
                     // Add point to list.
-                    pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation });
+                    pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, thisPoint, collidingSegments, collidingBuildings) });
 
                     // Get next point.
                     tFactor = BezierStep(tFactor, spacing);
                 }
             }
+
+            toolController.EndColliding();
         }
 
         /// <summary>

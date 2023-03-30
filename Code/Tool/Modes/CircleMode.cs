@@ -38,12 +38,14 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
+        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public override void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
+        public override void CalculatePoints(ToolController toolController, PrefabInfo prefab, Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -66,6 +68,7 @@ namespace LineToolMod.Modes
             float finalRotation = rotation;
 
             // Create points.
+            toolController.BeginColliding(out ulong[] collidingSegments, out ulong[] collidingBuildings);
             for (float i = startAngle; i < startAngle + (Mathf.PI * 2f); i += increment)
             {
                 float xPos = magnitude * Mathf.Cos(i);
@@ -92,8 +95,10 @@ namespace LineToolMod.Modes
                 thisPoint.y = terrainManager.SampleDetailHeight(thisPoint, out float _, out float _);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, thisPoint, collidingSegments, collidingBuildings) });
             }
+
+            toolController.EndColliding();
         }
 
         /// <summary>

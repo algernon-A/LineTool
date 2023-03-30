@@ -304,7 +304,7 @@ namespace LineToolMod
                     }
 
                     // Calculate points.
-                    CurrentMode?.CalculatePoints(m_accuratePosition, spacing, Rotation, _propPoints, rotationMode);
+                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, m_accuratePosition, spacing, Rotation, _propPoints, rotationMode);
                 }
             }
         }
@@ -329,7 +329,7 @@ namespace LineToolMod
             {
                 foreach (PointData point in _propPoints)
                 {
-                    overlay.DrawCircle(cameraInfo, Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
+                    overlay.DrawCircle(cameraInfo, point.Colliding ? Color.red : Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
                     ++toolManager.m_drawCallData.m_overlayCalls;
                 }
             }
@@ -348,6 +348,7 @@ namespace LineToolMod
 
             // Place item at this point.
             int pointIndex = _stepIndex;
+
             Singleton<SimulationManager>.instance.AddAction(CreateItem(pointIndex));
 
             // Increment index.
@@ -517,7 +518,10 @@ namespace LineToolMod
                 // Props - create one at each point.
                 foreach (PointData point in points)
                 {
-                    CreateProp(prop, point.Position, point.Rotation);
+                    if (!point.Colliding)
+                    {
+                        CreateProp(prop, point.Position, point.Rotation);
+                    }
                 }
             }
             else if (prefab is TreeInfo tree)
@@ -525,7 +529,10 @@ namespace LineToolMod
                 // Trees - create one at each point.
                 foreach (PointData point in points)
                 {
-                    CreateTree(tree, point.Position);
+                    if (!point.Colliding)
+                    {
+                        CreateTree(tree, point.Position);
+                    }
                 }
             }
             else if (prefab is BuildingInfo building)
@@ -533,7 +540,10 @@ namespace LineToolMod
                 // Buildings - create one at each point.
                 foreach (PointData point in points)
                 {
-                    CreateBuilding(building, point.Position, point.Rotation);
+                    if (!point.Colliding)
+                    {
+                        CreateBuilding(building, point.Position, point.Rotation);
+                    }
                 }
             }
 
@@ -550,27 +560,31 @@ namespace LineToolMod
             // Make threadsafe.
             lock (_propPoints)
             {
-                // Check any rotation delta.
-                float rotationDelta = Rotation - _originalRotation;
-
                 if (pointIndex < _propPoints.Count)
                 {
                     PointData point = _propPoints[pointIndex];
 
-                    if (_selectedPrefab is PropInfo prop)
+                    // Skip any colliding items.
+                    if (!point.Colliding)
                     {
-                        // Prop.
-                        CreateProp(prop, point.Position, point.Rotation + rotationDelta);
-                    }
-                    else if (_selectedPrefab is TreeInfo tree)
-                    {
-                        // Tree.
-                        CreateTree(tree, point.Position);
-                    }
-                    else if (_selectedPrefab is BuildingInfo building)
-                    {
-                        // Building.
-                        CreateBuilding(building, point.Position, point.Rotation + rotationDelta);
+                        // Check any rotation delta.
+                        float rotationDelta = Rotation - _originalRotation;
+
+                        if (_selectedPrefab is PropInfo prop)
+                        {
+                            // Prop.
+                            CreateProp(prop, point.Position, point.Rotation + rotationDelta);
+                        }
+                        else if (_selectedPrefab is TreeInfo tree)
+                        {
+                            // Tree.
+                            CreateTree(tree, point.Position);
+                        }
+                        else if (_selectedPrefab is BuildingInfo building)
+                        {
+                            // Building.
+                            CreateBuilding(building, point.Position, point.Rotation + rotationDelta);
+                        }
                     }
                 }
             }
@@ -743,6 +757,11 @@ namespace LineToolMod
             /// Point rotation.
             /// </summary>
             public float Rotation;
+
+            /// <summary>
+            /// Collision state.
+            /// </summary>
+            public bool Colliding;
         }
     }
 }

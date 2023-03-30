@@ -76,7 +76,9 @@ namespace LineToolMod.Modes
         /// <param name="toolManager">ToolManager instance.</param>
         /// <param name="overlay">Overlay effect instance.</param>
         /// <param name="pointList">Current mouse position.</param>
-        public virtual void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, List<PointData> pointList) { }
+        public virtual void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, List<PointData> pointList)
+        {
+        }
 
         /// <summary>
         /// Renders the overlay for this tool mode.
@@ -90,11 +92,36 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
+        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="rotationMode">Rotation calculation mode.</param>
-        public abstract void CalculatePoints(Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode);
+        public abstract void CalculatePoints(ToolController toolController, PrefabInfo prefab, Vector3 currentPos, float spacing, float rotation, List<PointData> pointList, RotationMode rotationMode);
+
+        /// <summary>
+        /// Checks for any collision at the specified point.
+        /// </summary>
+        /// <param name="prefab">Selected prefab.</param>
+        /// <param name="position">Position to check.</param>
+        /// <param name="collidingSegments">Colliding segments array.</param>
+        /// <param name="collidingBuildings">Colliding buildings array.</param>
+        /// <returns>True if the position has a collision for the selected prefab, false othewise.</returns>
+        protected bool CheckCollision(PrefabInfo prefab, Vector3 position, ulong[] collidingSegments, ulong[] collidingBuildings)
+        {
+            if (prefab is PropInfo prop)
+            {
+                return PropTool.CheckPlacementErrors(prop, position, false, 0, collidingSegments, collidingBuildings) != ToolBase.ToolErrors.None;
+            }
+            else if (prefab is TreeInfo tree)
+            {
+                return TreeTool.CheckPlacementErrors(tree, position, false, 0, collidingSegments, collidingBuildings) != ToolBase.ToolErrors.None;
+            }
+
+            // If we got here, no collision by default.
+            return false;
+        }
     }
 }
