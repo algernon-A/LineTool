@@ -48,13 +48,20 @@ namespace LineToolMod
             stepCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.StepMode = isChecked;
             currentY += 25f;
 
-            // Step button
-            UIButton stepButton = UIButtons.AddEvenSmallerButton(this, Margin, currentY, Translations.Translate("STEP"), PanelWidth - Margin - Margin);
+            // Step button.
+            float buttonWidth = (PanelWidth / 2f) - (Margin * 2f);
+            UIButton stepButton = UIButtons.AddEvenSmallerButton(this, Margin, currentY, Translations.Translate("STEP"), buttonWidth);
             stepButton.eventClicked += (c, p) =>
             {
                 LineTool.Instance.Step();
             };
-            currentY += 30f;
+
+            // Skip button.
+            UIButton skipButton = UIButtons.AddEvenSmallerButton(this, (Margin * 3f) + buttonWidth, currentY, Translations.Translate("SKIP"), buttonWidth);
+            skipButton.eventClicked += (c, p) =>
+            {
+                LineTool.Instance.Skip();
+            };
         }
 
         /// <summary>

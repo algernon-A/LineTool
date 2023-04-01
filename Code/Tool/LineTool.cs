@@ -351,6 +351,21 @@ namespace LineToolMod
 
             Singleton<SimulationManager>.instance.AddAction(CreateItem(pointIndex));
 
+            // Skip this point and move to next.
+            Skip();
+        }
+
+        /// <summary>
+        /// Skips the next pint in sequence.
+        /// </summary>
+        public void Skip()
+        {
+            // Only step if data is valid.
+            if (!_validEndPos || !StepMode)
+            {
+                return;
+            }
+
             // Increment index.
             ++_stepIndex;
 
