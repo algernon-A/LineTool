@@ -16,6 +16,11 @@ namespace LineToolMod
     /// </summary>
     internal class ToolOptionsPanel : StandalonePanel
     {
+        // Panel components.
+        private readonly BOBSlider _spacingSlider;
+        private readonly UIButton _stepButton;
+        private readonly UIButton _skipButton;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolOptionsPanel"/> class.
         /// </summary>
@@ -25,9 +30,9 @@ namespace LineToolMod
             float currentY = 50f;
 
             // Spacing slider.
-            BOBSlider spacingSlider = AddBOBSlider(this, DoubleMargin, currentY, PanelWidth - DoubleMargin - DoubleMargin, "SPACING", 1f, 100f, 0.1f, "Spacing");
-            spacingSlider.value = LineTool.Instance.Spacing;
-            spacingSlider.eventValueChanged += (c, value) => LineTool.Instance.Spacing = value;
+            _spacingSlider = AddBOBSlider(this, DoubleMargin, currentY, PanelWidth - DoubleMargin - DoubleMargin, "SPACING", 1f, 100f, 0.1f, "Spacing");
+            _spacingSlider.value = LineTool.Instance.Spacing;
+            _spacingSlider.eventValueChanged += (c, value) => LineTool.Instance.Spacing = value;
             currentY += 40f;
 
             // Rotation slider.
@@ -50,18 +55,21 @@ namespace LineToolMod
 
             // Step button.
             float buttonWidth = (PanelWidth / 2f) - (Margin * 2f);
-            UIButton stepButton = UIButtons.AddEvenSmallerButton(this, Margin, currentY, Translations.Translate("STEP"), buttonWidth);
-            stepButton.eventClicked += (c, p) =>
+            _stepButton = UIButtons.AddEvenSmallerButton(this, Margin, currentY, Translations.Translate("STEP"), buttonWidth);
+            _stepButton.eventClicked += (c, p) =>
             {
                 LineTool.Instance.Step();
             };
 
             // Skip button.
-            UIButton skipButton = UIButtons.AddEvenSmallerButton(this, (Margin * 3f) + buttonWidth, currentY, Translations.Translate("SKIP"), buttonWidth);
-            skipButton.eventClicked += (c, p) =>
+            _skipButton = UIButtons.AddEvenSmallerButton(this, (Margin * 3f) + buttonWidth, currentY, Translations.Translate("SKIP"), buttonWidth);
+            _skipButton.eventClicked += (c, p) =>
             {
                 LineTool.Instance.Skip();
             };
+
+            // Set initial state.
+            UpdateButtonStates();
         }
 
         /// <summary>
@@ -78,6 +86,26 @@ namespace LineToolMod
         /// Gets the panel's title.
         /// </summary>
         protected override string PanelTitle => Translations.Translate("MOD_NAME");
+
+        /// <summary>
+        /// Updates button states to reflect the current tool state.
+        /// </summary>
+        internal void UpdateButtonStates()
+        {
+            // Set according to current stepping state.
+            if (LineTool.Instance != null && LineTool.Instance.Stepping)
+            {
+                _spacingSlider.Hide();
+                _skipButton.Enable();
+                _stepButton.Enable();
+            }
+            else
+            {
+                _spacingSlider.Show();
+                _skipButton.Disable();
+                _stepButton.Disable();
+            }
+        }
 
         /// <summary>
         /// Gets the panel's default position.

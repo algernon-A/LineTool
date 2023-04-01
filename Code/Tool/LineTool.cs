@@ -108,8 +108,7 @@ namespace LineToolMod
                 // Clear flags if mode is being disabled.
                 if (!value)
                 {
-                    _validEndPos = false;
-                    _stepIndex = 0;
+                    Stepping = false;
                 }
             }
         }
@@ -143,6 +142,29 @@ namespace LineToolMod
         /// Gets a value indicating whether the RON tool is currently active (true) or inactive (false).
         /// </summary>
         internal static bool IsActiveTool => Instance != null && ToolsModifierControl.toolController.CurrentTool == Instance;
+
+        /// <summary>
+        /// Gets a value indicating whether stepping is active.
+        /// </summary>
+        internal bool Stepping
+        {
+            get => _validEndPos;
+
+            private set
+            {
+                // Don't do anything if no change.
+                if (_validEndPos != value)
+                {
+                    _validEndPos = value;
+
+                    // Update panel button states.
+                    StandalonePanelManager<ToolOptionsPanel>.Panel?.UpdateButtonStates();
+
+                    // Reset step index.
+                    _stepIndex = 0;
+                }
+            }
+        }
 
         /// <summary>
         /// Sets vehicle ingore flags to ignore all vehicles.
@@ -374,9 +396,8 @@ namespace LineToolMod
             {
                 if (_stepIndex == _propPoints.Count)
                 {
-                    // Reached the end of this line; reset values.
-                    _stepIndex = 0;
-                    _validEndPos = false;
+                    // Reached the end of this line; stop stepping.
+                    Stepping = false;
 
                     // Mode placement post-processing.
                     CurrentMode.ItemsPlaced(_endPos);
@@ -489,10 +510,9 @@ namespace LineToolMod
                         if (StepMode)
                         {
                             // Step mode - save end point.
-                            _validEndPos = true;
+                            Stepping = true;
                             _endPos = m_accuratePosition;
                             _originalRotation = Rotation;
-                            _stepIndex = 0;
                         }
                         else
                         {
@@ -514,8 +534,7 @@ namespace LineToolMod
                 {
                     // Right-click; clear selection.
                     CurrentMode.Reset();
-                    _validEndPos = false;
-                    _stepIndex = 0;
+                    Stepping = false;
                 }
             }
         }
