@@ -349,6 +349,13 @@ namespace LineToolMod
             // Point overlays.
             lock (_propPoints)
             {
+                // Active point if stepping.
+                if (_validEndPos)
+                {
+                    overlay.DrawCircle(cameraInfo, Color.green, _propPoints[_stepIndex].Position, 7f, -1024f, 1024f, false, false);
+                    ++toolManager.m_drawCallData.m_overlayCalls;
+                }
+
                 foreach (PointData point in _propPoints)
                 {
                     overlay.DrawCircle(cameraInfo, point.Colliding ? Color.red : Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
