@@ -108,11 +108,6 @@ namespace LineToolMod
         public override bool RememberPosition => false;
 
         /// <summary>
-        /// Sets a value indicating whether the options panel is currently open.
-        /// </summary>
-        public bool OptionsPanelOpen { set => _optionsPanelToggle.activeStateIndex = value ? 1 : 0; }
-
-        /// <summary>
         /// Gets the panel's default position.
         /// </summary>
         protected override void ApplyDefaultPosition()
@@ -224,28 +219,44 @@ namespace LineToolMod
             {
                 case ModeIndexes.Single:
                     ToolsModifierControl.toolController.CurrentTool = LineTool.Instance.BaseTool;
+                    StandalonePanelManager<ToolOptionsPanel>.Panel?.Close();
+                    _optionsPanelToggle.Hide();
                     break;
 
                 case ModeIndexes.Line:
                     ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
                     LineTool.Instance.CurrentMode = new LineMode();
+                    OpenOptionsPanel();
                     break;
 
                 case ModeIndexes.Curve:
                     ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
                     LineTool.Instance.CurrentMode = new CurveMode();
+                    OpenOptionsPanel();
                     break;
 
                 case ModeIndexes.Freeform:
                     ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
                     LineTool.Instance.CurrentMode = new FreeformMode();
+                    OpenOptionsPanel();
                     break;
 
                 case ModeIndexes.Circle:
                     ToolsModifierControl.toolController.CurrentTool = LineTool.Instance;
                     LineTool.Instance.CurrentMode = new CircleMode();
+                    OpenOptionsPanel();
                     break;
             }
+        }
+
+        /// <summary>
+        /// Opens the options panel.
+        /// </summary>
+        private void OpenOptionsPanel()
+        {
+            _optionsPanelToggle.Show();
+            _optionsPanelToggle.activeStateIndex = 1;
+            StandalonePanelManager<ToolOptionsPanel>.Create();
         }
 
         /// <summary>
