@@ -356,9 +356,13 @@ namespace LineToolMod
                     ++toolManager.m_drawCallData.m_overlayCalls;
                 }
 
+                // Set color according to stepping mode.
+                Color pointColor = _stepMode ? Color.magenta : Color.green;
+
+                // Remaining points.
                 foreach (PointData point in _propPoints)
                 {
-                    overlay.DrawCircle(cameraInfo, point.Colliding ? Color.red : Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
+                    overlay.DrawCircle(cameraInfo, point.Colliding ? Color.red : pointColor, point.Position, 5f, -1024f, 1024f, false, false);
                     ++toolManager.m_drawCallData.m_overlayCalls;
                 }
             }
