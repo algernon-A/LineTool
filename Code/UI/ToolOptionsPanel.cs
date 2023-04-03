@@ -20,6 +20,8 @@ namespace LineToolMod
         private readonly BOBSlider _spacingSlider;
         private readonly UIButton _stepButton;
         private readonly UIButton _skipButton;
+        private readonly UIMultiStateButton _relativeAngleButton;
+        private readonly UIMultiStateButton _absoluteAngleButton;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolOptionsPanel"/> class.
@@ -27,6 +29,8 @@ namespace LineToolMod
         public ToolOptionsPanel()
         {
             const float DoubleMargin = Margin * 2f;
+            const float ToggleSize = 45f;
+
             float currentY = 50f;
 
             // Spacing slider.
@@ -41,11 +45,20 @@ namespace LineToolMod
             rotationSlider.eventValueChanged += (c, value) => LineTool.Instance.Rotation = value * Mathf.Deg2Rad;
             currentY += 40f;
 
-            // Relative rotation check.
-            UICheckBox relativeRotationCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("ROTATION_RELATIVE"));
-            relativeRotationCheck.isChecked = LineTool.Instance.RelativeRotation;
-            relativeRotationCheck.eventCheckChanged += (c, isChecked) => LineTool.Instance.RelativeRotation = isChecked;
-            currentY += 25f;
+            // Angle mode buttons.
+            UITextureAtlas toggleAtlas = UITextures.CreateSpriteAtlas("LineToolToggles", 1024, "LineOptions");
+            _relativeAngleButton = AddToggleButton(this, "AngleRelative", toggleAtlas, ToggleSize);
+            _relativeAngleButton.relativePosition = new Vector2(Margin, currentY);
+            _relativeAngleButton.tooltip = Translations.Translate("ROTATION_RELATIVE");
+            _absoluteAngleButton = AddToggleButton(this, "AngleAbsolute", toggleAtlas, ToggleSize);
+            _absoluteAngleButton.relativePosition = new Vector2(ToggleSize + DoubleMargin, currentY);
+            _absoluteAngleButton.tooltip = Translations.Translate("ROTATION_ABSOLUTE");
+
+            currentY += ToggleSize + Margin + Margin;
+
+            // Spacer panel.
+            UISpacers.AddOptionsSpacer(this, Margin, currentY, PanelWidth - DoubleMargin);
+            currentY += 10f;
 
             // Step check.
             UICheckBox stepCheck = UICheckBoxes.AddLabelledCheckBox(this, Margin, currentY, Translations.Translate("STEP_ENABLED"));
@@ -68,6 +81,48 @@ namespace LineToolMod
                 LineTool.Instance.Skip();
             };
 
+            // Set initial angle toggle mode.
+            if (LineTool.Instance.RelativeRotation)
+            {
+                _relativeAngleButton.activeStateIndex = 1;
+            }
+            else
+            {
+                _absoluteAngleButton.activeStateIndex = 1;
+            }
+
+            // Absolute angle toggle event handler.
+            _absoluteAngleButton.eventActiveStateIndexChanged += (c, state) =>
+            {
+                if (state == 1)
+                {
+                    // Deselect relative angle toggle if this is selected.
+                    _relativeAngleButton.activeStateIndex = 0;
+                    LineTool.Instance.RelativeRotation = false;
+                }
+                else if (_relativeAngleButton.activeStateIndex == 0)
+                {
+                    // If relative angle button is not selected, force this one active.
+                    _absoluteAngleButton.activeStateIndex = 1;
+                }
+            };
+
+            // Relative angle toggle event handler.
+            _relativeAngleButton.eventActiveStateIndexChanged += (c, state) =>
+            {
+                if (state == 1)
+                {
+                    // Deselect absolute angle toggle if this is selected.
+                    _absoluteAngleButton.activeStateIndex = 0;
+                    LineTool.Instance.RelativeRotation = true;
+                }
+                else if (_absoluteAngleButton.activeStateIndex == 0)
+                {
+                    // If absolute angle button is not selected, force this one active.
+                    _relativeAngleButton.activeStateIndex = 1;
+                }
+            };
+
             // Set initial state.
             UpdateButtonStates();
         }
@@ -80,7 +135,7 @@ namespace LineToolMod
         /// <summary>
         /// Gets the panel height.
         /// </summary>
-        public override float PanelHeight => 210f;
+        public override float PanelHeight => 250f;
 
         /// <summary>
         /// Gets the panel's title.
@@ -181,6 +236,66 @@ namespace LineToolMod
             newSlider.TrueValue = 0f;
 
             return newSlider;
+        }
+
+        /// <summary>
+        /// Adds a multi-state toggle button to the specified UIComponent.
+        /// </summary>
+        /// <param name="parent">Parent UIComponent.</param>
+        /// <param name="spriteName">Sprite name.</param>
+        /// <param name="atlas">Button atlas.</param>
+        /// <param name="size">Button size.</param>
+        /// <returns>New UIMultiStateButton.</returns>
+        private UIMultiStateButton AddToggleButton(UIComponent parent, string spriteName, UITextureAtlas atlas, float size)
+        {
+            // Create button.
+            UIMultiStateButton newButton = parent.AddUIComponent<UIMultiStateButton>();
+            newButton.name = spriteName;
+            newButton.atlas = atlas;
+
+            // Get sprite sets.
+            UIMultiStateButton.SpriteSetState fgSpriteSetState = newButton.foregroundSprites;
+            UIMultiStateButton.SpriteSetState bgSpriteSetState = newButton.backgroundSprites;
+
+            // State 0 background.
+            UIMultiStateButton.SpriteSet bgSpriteSetZero = bgSpriteSetState[0];
+            bgSpriteSetZero.normal = spriteName;
+            bgSpriteSetZero.focused = spriteName + "Pressed";
+            bgSpriteSetZero.hovered = spriteName + "Hovered";
+            bgSpriteSetZero.pressed = spriteName + "Pressed";
+            bgSpriteSetZero.disabled = spriteName;
+
+            // Add state 1.
+            fgSpriteSetState.AddState();
+            bgSpriteSetState.AddState();
+
+            // State 1 background.
+            UIMultiStateButton.SpriteSet bgSpriteSetOne = bgSpriteSetState[1];
+            bgSpriteSetOne.normal = spriteName + "Pressed";
+            bgSpriteSetOne.focused = spriteName + "Pressed";
+            bgSpriteSetOne.hovered = spriteName + "Pressed";
+            bgSpriteSetOne.pressed = spriteName + "Pressed";
+            bgSpriteSetOne.disabled = spriteName + "Pressed";
+
+            // Set initial state.
+            newButton.state = UIMultiStateButton.ButtonState.Normal;
+            newButton.activeStateIndex = 0;
+
+            // Size and appearance.
+            newButton.autoSize = false;
+            newButton.width = size;
+            newButton.height = size;
+            newButton.foregroundSpriteMode = UIForegroundSpriteMode.Fill;
+            newButton.spritePadding = new RectOffset(0, 0, 0, 0);
+            newButton.playAudioEvents = true;
+
+            // Enforce defaults.
+            newButton.canFocus = false;
+            newButton.enabled = true;
+            newButton.isInteractive = true;
+            newButton.isVisible = true;
+
+            return newButton;
         }
     }
 }

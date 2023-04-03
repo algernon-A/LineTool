@@ -26,6 +26,7 @@
 		<_TranslationsCore Include="../AlgernonCommons/Translations/*.csv" />
 		<_Resources Include="$(ProjectDir)/Resources/*.*" />
 		<_PLTIcons Include="$(ProjectDir)/Resources/PLT/*.*" />
+		<_LineOptionIcons Include="$(ProjectDir)/Resources/LineOptions/*.*" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="CitiesHarmony.API" Version="2.2.0" />
@@ -45,6 +46,7 @@
 		<Copy SourceFiles="@(_TranslationsCore)" DestinationFolder="$(DeployDir)/Translations/Core" />
 		<Copy SourceFiles="@(_Resources)" DestinationFolder="$(DeployDir)/Resources" />
 		<Copy SourceFiles="@(_PLTIcons)" DestinationFolder="$(DeployDir)/Resources/PLT" />
+		<Copy SourceFiles="@(_LineOptionIcons)" DestinationFolder="$(DeployDir)/Resources/LineOptions" />
 	</Target>
 	<Import Project="..\AlgernonCommons\AlgernonCommonsPatchingShared.projitems" Label="Shared" />
 </Project>
