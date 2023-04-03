@@ -5,6 +5,7 @@
 
 namespace LineToolMod
 {
+    using System.Collections.Generic;
     using AlgernonCommons.Patching;
     using ICities;
 
@@ -13,6 +14,11 @@ namespace LineToolMod
     /// </summary>
     public sealed class Loading : PatcherLoadingBase<OptionsPanel, Patcher>
     {
+        /// <summary>
+        /// Gets a list of permitted loading modes.
+        /// </summary>
+        protected override List<AppMode> PermittedModes => new List<AppMode> { AppMode.Game, AppMode.MapEditor, AppMode.AssetEditor, AppMode.ScenarioEditor };
+
         /// <summary>
         /// Performs any actions upon successful creation of the mod.
         /// E.g. Can be used to patch any other mods.
