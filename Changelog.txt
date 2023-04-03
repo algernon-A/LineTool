@@ -1,4 +1,4 @@
 Version 0.1.1 -
 
-- Remove redundant UUI codeS
+- Remove redundant UUI code
 - Support map,asset, and scenario editors
