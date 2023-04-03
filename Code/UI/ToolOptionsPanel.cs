@@ -54,6 +54,18 @@ namespace LineToolMod
             _absoluteAngleButton.relativePosition = new Vector2(ToggleSize + DoubleMargin, currentY);
             _absoluteAngleButton.tooltip = Translations.Translate("ROTATION_ABSOLUTE");
 
+            // Set to length button.
+            UIButton lengthButton = AddIconButton(this, "Length", toggleAtlas, ToggleSize);
+            lengthButton.relativePosition = new Vector2((ToggleSize + DoubleMargin) * 2f, currentY);
+            lengthButton.eventClicked += (c, p) => LineTool.Instance?.SetToLength();
+            lengthButton.tooltip = Translations.Translate("SET_LENGTH");
+
+            // Set to width button.
+            UIButton widthButton = AddIconButton(this, "Width", toggleAtlas, ToggleSize);
+            widthButton.relativePosition = new Vector2((ToggleSize + DoubleMargin) * 3f, currentY);
+            widthButton.eventClicked += (c, p) => LineTool.Instance?.SetToWidth();
+            widthButton.tooltip = Translations.Translate("SET_WIDTH");
+
             currentY += ToggleSize + Margin + Margin;
 
             // Spacer panel.
@@ -141,6 +153,11 @@ namespace LineToolMod
         /// Gets the panel's title.
         /// </summary>
         protected override string PanelTitle => Translations.Translate("MOD_NAME");
+
+        /// <summary>
+        /// Refreshes the spacing slider's value.
+        /// </summary>
+        internal void RefreshSpacing() => _spacingSlider.TrueValue = LineTool.Instance.Spacing;
 
         /// <summary>
         /// Updates button states to reflect the current tool state.
@@ -294,6 +311,34 @@ namespace LineToolMod
             newButton.enabled = true;
             newButton.isInteractive = true;
             newButton.isVisible = true;
+
+            return newButton;
+        }
+
+        /// <summary>
+        /// Adds an icon button to the specified component.
+        /// </summary>
+        /// <param name="parent">Parent UIComponent.</param>
+        /// <param name="spriteName">Sprite name.</param>
+        /// <param name="atlas">Button atlas.</param>
+        /// <param name="size">Button size.</param>
+        /// <returns>New UIButton.</returns>
+        private UIButton AddIconButton(UIComponent parent, string spriteName, UITextureAtlas atlas, float size)
+        {
+            UIButton newButton = parent.AddUIComponent<UIButton>();
+
+            // Size and position.
+            newButton.height = size;
+            newButton.width = size;
+
+            // Appearance.
+            newButton.atlas = atlas;
+            newButton.normalFgSprite = spriteName;
+            newButton.focusedFgSprite = spriteName;
+            newButton.hoveredFgSprite = spriteName + "Hovered";
+            newButton.disabledFgSprite = spriteName;
+            newButton.pressedFgSprite = spriteName + "Pressed";
+            newButton.playAudioEvents = true;
 
             return newButton;
         }

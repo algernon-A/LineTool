@@ -369,6 +369,50 @@ namespace LineToolMod
         }
 
         /// <summary>
+        /// Sets  spacing to the selected prefab's length.
+        /// </summary>
+        public void SetToLength()
+        {
+            if (SelectedPrefab is PropInfo prop)
+            {
+                Spacing = prop.m_mesh.bounds.extents.z * 2f;
+            }
+            else if (SelectedPrefab is TreeInfo tree)
+            {
+                Spacing = tree.m_mesh.bounds.extents.z * 2f;
+            }
+            else if (SelectedPrefab is BuildingInfo building)
+            {
+                Spacing = building.m_mesh.bounds.extents.z * 2f;
+            }
+
+            // Update options panel.
+            StandalonePanelManager<ToolOptionsPanel>.Panel?.RefreshSpacing();
+        }
+
+        /// <summary>
+        /// Sets spacing to the selected prefab's width.
+        /// </summary>
+        public void SetToWidth()
+        {
+            if (SelectedPrefab is PropInfo prop)
+            {
+                Spacing = prop.m_mesh.bounds.extents.x * 2f;
+            }
+            else if (SelectedPrefab is TreeInfo tree)
+            {
+                Spacing = tree.m_mesh.bounds.extents.x * 2f;
+            }
+            else if (SelectedPrefab is BuildingInfo building)
+            {
+                Spacing = building.m_mesh.bounds.extents.x * 2f;
+            }
+
+            // Update options panel.
+            StandalonePanelManager<ToolOptionsPanel>.Panel?.RefreshSpacing();
+        }
+
+        /// <summary>
         /// Adds the next item in sequence.
         /// </summary>
         public void Step()
