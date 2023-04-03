@@ -8,7 +8,6 @@ namespace LineToolMod
     using System.IO;
     using System.Xml.Serialization;
     using AlgernonCommons.XML;
-    using UnityEngine;
 
     /// <summary>
     /// Global mod settings.
