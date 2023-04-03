@@ -27,6 +27,15 @@ namespace LineToolMod
             // Vanilla game panels.
             yield return AccessTools.Method(typeof(BeautificationPanel), "OnButtonClicked");
             yield return AccessTools.Method(typeof(LandscapingPanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(MonumentsPanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(WondersPanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(EducationPanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(HealthcarePanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(FireDepartmentPanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(ElectricityPanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(WaterAndSewagePanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(GarbagePanel), "OnButtonClicked");
+            yield return AccessTools.Method(typeof(PublicTransportPanel), "OnButtonClicked");
 
             // Natural resources brush (detours BeautificationGroupPanel).
             Type nrbType = Type.GetType("NaturalResourcesBrush.Detours.BeautificationPanelDetour,NaturalResourcesBrush");
