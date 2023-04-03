@@ -23,18 +23,6 @@ namespace LineToolMod
         private static readonly string SettingsFileName = Path.Combine(ColossalFramework.IO.DataLocation.localApplicationData, "LineTool.xml");
 
         /// <summary>
-        /// UUI key.
-        /// </summary>
-        [XmlIgnore]
-        private static readonly UnsavedInputKey UUIKey = new UnsavedInputKey(name: "Line Tool hotkey", keyCode: KeyCode.L, control: false, shift: false, alt: true);
-
-        /// <summary>
-        /// Gets the current hotkey as a UUI UnsavedInputKey.
-        /// </summary>
-        [XmlIgnore]
-        internal static UnsavedInputKey ToolKey => UUIKey;
-
-        /// <summary>
         /// Loads settings from file.
         /// </summary>
         internal static void Load() => XMLFileUtils.Load<ModSettings>(SettingsFileName);
