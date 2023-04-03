@@ -383,7 +383,7 @@ namespace LineToolMod
             }
             else if (SelectedPrefab is BuildingInfo building)
             {
-                Spacing = building.m_mesh.bounds.extents.z * 2f;
+                Spacing = building.GetLength() * 8f;
             }
 
             // Update options panel.
@@ -405,7 +405,7 @@ namespace LineToolMod
             }
             else if (SelectedPrefab is BuildingInfo building)
             {
-                Spacing = building.m_mesh.bounds.extents.x * 2f;
+                Spacing = building.GetWidth() * 8f;
             }
 
             // Update options panel.
@@ -546,7 +546,6 @@ namespace LineToolMod
 
             // Don't do anything if mouse is inside UI or if there are any errors other than failed raycast.
             if (m_toolController.IsInsideUI || (m_selectErrors != ToolErrors.None && m_selectErrors != ToolErrors.RaycastFailed))
-
             {
                 return;
             }
