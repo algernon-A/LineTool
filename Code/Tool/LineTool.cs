@@ -544,17 +544,25 @@ namespace LineToolMod
                 ToolsModifierControl.SetTool<DefaultTool>();
             }
 
-            // Don't do anything if mouse is inside UI or if there are any errors other than failed raycast.
-            if (m_toolController.IsInsideUI || (m_selectErrors != ToolErrors.None && m_selectErrors != ToolErrors.RaycastFailed))
-            {
-                return;
-            }
-
             // Check for mousedown events with button zero.
             if (e.type == EventType.MouseDown)
             {
                 // Got one; use the event.
                 UIInput.MouseUsed();
+
+                if (e.button == 1)
+                {
+                    // Right-click; clear selection.
+                    CurrentMode.Reset();
+                    Stepping = false;
+                    return;
+                }
+
+                // Don't do anything if mouse is inside UI or if there are any errors other than failed raycast.
+                if (m_toolController.IsInsideUI || (m_selectErrors != ToolErrors.None && m_selectErrors != ToolErrors.RaycastFailed))
+                {
+                    return;
+                }
 
                 if (e.button == 0)
                 {
@@ -587,12 +595,6 @@ namespace LineToolMod
                             }
                         }
                     }
-                }
-                else if (e.button == 1)
-                {
-                    // Right-click; clear selection.
-                    CurrentMode.Reset();
-                    Stepping = false;
                 }
             }
         }
