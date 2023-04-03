@@ -8,7 +8,6 @@ namespace LineToolMod.Modes
     using System.Collections.Generic;
     using ColossalFramework;
     using ColossalFramework.Math;
-    using ColossalFramework.UI;
     using UnityEngine;
     using static LineTool;
 

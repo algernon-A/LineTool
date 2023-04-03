@@ -546,42 +546,46 @@ namespace LineToolMod
 
             // Don't do anything if mouse is inside UI or if there are any errors other than failed raycast.
             if (m_toolController.IsInsideUI || (m_selectErrors != ToolErrors.None && m_selectErrors != ToolErrors.RaycastFailed))
+
             {
                 return;
             }
 
             // Check for mousedown events with button zero.
-            if (e.type == EventType.MouseDown && _selectedPrefab != null)
+            if (e.type == EventType.MouseDown)
             {
                 // Got one; use the event.
                 UIInput.MouseUsed();
 
                 if (e.button == 0)
                 {
-                    // Handle click via current mode.
-                    if (CurrentMode.HandleClick(m_accuratePosition))
+                    if (_selectedPrefab != null)
                     {
-                        // Stepping?
-                        if (StepMode)
+                        // Handle click via current mode.
+                        if (CurrentMode.HandleClick(m_accuratePosition))
                         {
-                            // Step mode - save end point.
-                            Stepping = true;
-                            _endPos = m_accuratePosition;
-                            _originalRotation = Rotation;
-                        }
-                        else
-                        {
-                            // Not step mode - place all items.
-                            lock (_propPoints)
+                            // Stepping?
+                            if (StepMode)
                             {
-                                PointData[] points = new PointData[_propPoints.Count];
-                                _propPoints.CopyTo(points);
-                                PrefabInfo selectedPrefab = _selectedPrefab;
-                                Singleton<SimulationManager>.instance.AddAction(CreateItems(points, selectedPrefab));
+                                // Step mode - save end point.
+                                Stepping = true;
+                                _endPos = m_accuratePosition;
+                                _originalRotation = Rotation;
                             }
+                            else
+                            {
+                                // Not step mode - place all items.
+                                lock (_propPoints)
+                                {
+                                    PointData[] points = new PointData[_propPoints.Count];
+                                    _propPoints.CopyTo(points);
+                                    PrefabInfo selectedPrefab = _selectedPrefab;
+                                    Singleton<SimulationManager>.instance.AddAction(CreateItems(points, selectedPrefab));
+                                }
 
-                            // Mode placement post-processing.
-                            CurrentMode.ItemsPlaced(m_accuratePosition);
+                                // Mode placement post-processing.
+                                CurrentMode.ItemsPlaced(m_accuratePosition);
+                            }
                         }
                     }
                 }
@@ -816,16 +820,16 @@ namespace LineToolMod
                         // Only interested in private building AI.
                         if (buildingAI != null)
                         {
-                                // Check to see if construction time is greater than zero.
-                                if (buildingAI.m_constructionTime > 0)
-                                {
-                                    // Complete construction.
-                                    Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].m_frame0.m_constructState = byte.MaxValue;
-                                    _buildingCompleted.Invoke(buildingAI, buildingID, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID]);
+                            // Check to see if construction time is greater than zero.
+                            if (buildingAI.m_constructionTime > 0)
+                            {
+                                // Complete construction.
+                                Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID].m_frame0.m_constructState = byte.MaxValue;
+                                _buildingCompleted.Invoke(buildingAI, buildingID, ref Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingID]);
 
-                                    // Have to do this manually as CommonBuildingAI.BuildingCompleted won't if construction time isn't zero.
-                                    Singleton<BuildingManager>.instance.UpdateBuildingRenderer(buildingID, updateGroup: true);
-                                }
+                                // Have to do this manually as CommonBuildingAI.BuildingCompleted won't if construction time isn't zero.
+                                Singleton<BuildingManager>.instance.UpdateBuildingRenderer(buildingID, updateGroup: true);
+                            }
                         }
                     }
                 }
