@@ -41,7 +41,6 @@ namespace LineToolMod
         public override void LoadSettings()
         {
             ModSettings.Load();
-            Logging.DetailLogging = true;
         }
     }
 }
