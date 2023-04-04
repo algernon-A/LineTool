@@ -21,10 +21,13 @@ namespace LineToolMod
         private const float LeftMargin = 24f;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OptionsPanel"/> class.
+        /// Called by Unity before the first frame.
+        /// Used to perform setup.
         /// </summary>
-        internal OptionsPanel()
+        public override void Start()
         {
+            base.Start();
+
             // Add controls.
             // Y position indicator.
             float currentY = Margin;

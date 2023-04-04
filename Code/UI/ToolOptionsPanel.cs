@@ -17,17 +17,35 @@ namespace LineToolMod
     internal class ToolOptionsPanel : StandalonePanel
     {
         // Panel components.
-        private readonly BOBSlider _spacingSlider;
-        private readonly UIButton _stepButton;
-        private readonly UIButton _skipButton;
-        private readonly UIMultiStateButton _relativeAngleButton;
-        private readonly UIMultiStateButton _absoluteAngleButton;
+        private BOBSlider _spacingSlider;
+        private UIButton _stepButton;
+        private UIButton _skipButton;
+        private UIMultiStateButton _relativeAngleButton;
+        private UIMultiStateButton _absoluteAngleButton;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolOptionsPanel"/> class.
+        /// Gets the panel width.
         /// </summary>
-        public ToolOptionsPanel()
+        public override float PanelWidth => 36f * 7f;
+
+        /// <summary>
+        /// Gets the panel height.
+        /// </summary>
+        public override float PanelHeight => 250f;
+
+        /// <summary>
+        /// Gets the panel's title.
+        /// </summary>
+        protected override string PanelTitle => Translations.Translate("MOD_NAME");
+
+        /// <summary>
+        /// Called by Unity before the first frame.
+        /// Used to perform setup.
+        /// </summary>
+        public override void Start()
         {
+            base.Start();
+
             const float DoubleMargin = Margin * 2f;
             const float ToggleSize = 45f;
 
@@ -138,21 +156,6 @@ namespace LineToolMod
             // Set initial state.
             UpdateButtonStates();
         }
-
-        /// <summary>
-        /// Gets the panel width.
-        /// </summary>
-        public override float PanelWidth => 36f * 7f;
-
-        /// <summary>
-        /// Gets the panel height.
-        /// </summary>
-        public override float PanelHeight => 250f;
-
-        /// <summary>
-        /// Gets the panel's title.
-        /// </summary>
-        protected override string PanelTitle => Translations.Translate("MOD_NAME");
 
         /// <summary>
         /// Refreshes the spacing slider's value.

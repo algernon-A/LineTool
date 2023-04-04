@@ -20,13 +20,43 @@ namespace LineToolMod
         private const float ButtonSize = 36f;
 
         // Panel components.
-        private readonly UIMultiStateButton _optionsPanelToggle;
+        private UIMultiStateButton _optionsPanelToggle;
+
+        // Tool selection indicies.
+        private enum ModeIndexes : int
+        {
+            None = -1,
+            Single,
+            Line,
+            Curve,
+            Freeform,
+            Circle,
+            NumModes,
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolModePanel"/> class.
+        /// Gets the panel width.
         /// </summary>
-        public ToolModePanel()
+        public override float PanelWidth => ButtonSize * ((int)ModeIndexes.NumModes + 2);
+
+        /// <summary>
+        /// Gets the panel height.
+        /// </summary>
+        public override float PanelHeight => ButtonSize;
+
+        /// <summary>
+        /// Gets a value indicating whether the panel's previous position should be remembered after closing.
+        /// </summary>
+        public override bool RememberPosition => false;
+
+        /// <summary>
+        /// Called by Unity before the first frame.
+        /// Used to perform setup.
+        /// </summary>
+        public override void Start()
         {
+            base.Start();
+
             // Add mode tabstrip.
             float tabStripWidth = ButtonSize * (int)ModeIndexes.NumModes;
             UITabstrip controlTabStrip = AddUIComponent<UITabstrip>();
@@ -79,33 +109,6 @@ namespace LineToolMod
             // Make sure tool options panel is closed when this is closed.
             EventClose += () => StandalonePanelManager<ToolOptionsPanel>.Panel?.Close();
         }
-
-        // Tool selection indicies.
-        private enum ModeIndexes : int
-        {
-            None = -1,
-            Single,
-            Line,
-            Curve,
-            Freeform,
-            Circle,
-            NumModes,
-        }
-
-        /// <summary>
-        /// Gets the panel width.
-        /// </summary>
-        public override float PanelWidth => ButtonSize * ((int)ModeIndexes.NumModes + 2);
-
-        /// <summary>
-        /// Gets the panel height.
-        /// </summary>
-        public override float PanelHeight => ButtonSize;
-
-        /// <summary>
-        /// Gets a value indicating whether the panel's previous position should be remembered after closing.
-        /// </summary>
-        public override bool RememberPosition => false;
 
         /// <summary>
         /// Gets the panel's default position.
