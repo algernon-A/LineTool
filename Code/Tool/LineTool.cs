@@ -15,6 +15,7 @@ namespace LineToolMod
     using HarmonyLib;
     using LineToolMod.Modes;
     using UnityEngine;
+    using TreeInstance = global::TreeInstance;
 
     /// <summary>
     /// The line tool itslef.
@@ -232,7 +233,7 @@ namespace LineToolMod
                 m_ignoreNodeFlags = NetNode.Flags.All,
                 m_ignoreSegmentFlags = GetSegmentIgnoreFlags(out input.m_segmentNameOnly),
                 m_ignoreBuildingFlags = Building.Flags.None,
-                m_ignoreTreeFlags = global::TreeInstance.Flags.All,
+                m_ignoreTreeFlags = TreeInstance.Flags.All,
                 m_ignorePropFlags = PropInstance.Flags.All,
                 m_ignoreVehicleFlags = GetVehicleIgnoreFlags(),
                 m_ignoreParkedVehicleFlags = VehicleParked.Flags.All,
@@ -332,6 +333,114 @@ namespace LineToolMod
         }
 
         /// <summary>
+        /// Called by the game when tool geometry is to be rendered.
+        /// </summary>
+        /// <param name="cameraInfo">Current camera instance.</param>
+        public override void RenderGeometry(RenderManager.CameraInfo cameraInfo)
+        {
+            // Don't preview prefabs when in step mode.
+            if (!_stepMode)
+            {
+                if (SelectedPrefab is PropInfo propInfo)
+                {
+                    Randomizer randomizer = default;
+
+                    // Preview props.
+                    foreach (PointData point in _propPoints)
+                    {
+                        // Skip blocked points.
+                        if (point.Colliding)
+                        {
+                            continue;
+                        }
+
+                        // Based on game code from PropTool.
+                        ushort seed = Singleton<PropManager>.instance.m_props.NextFreeItem(ref randomizer);
+                        Randomizer propRandomizer = new Randomizer(seed);
+                        float scale = propInfo.m_minScale + (propRandomizer.Int32(10000u) * (propInfo.m_maxScale - propInfo.m_minScale) * 0.0001f);
+                        Color color = propInfo.GetColor(ref propRandomizer);
+                        InstanceID id = default;
+                        if (propInfo.m_requireWaterMap)
+                        {
+                            Singleton<TerrainManager>.instance.GetHeightMapping(point.Position, out Texture heightMap, out Vector4 heightMapping, out Vector4 surfaceMapping);
+                            Singleton<TerrainManager>.instance.GetWaterMapping(point.Position, out Texture waterMap, out Vector4 waterHeightMapping, out Vector4 waterSurfaceMapping);
+                            PropInstance.RenderInstance(cameraInfo, propInfo, id, point.Position, scale, point.Rotation, color, RenderManager.DefaultColorLocation, active: true, heightMap, heightMapping, surfaceMapping, waterMap, waterHeightMapping, waterSurfaceMapping);
+                        }
+                        else if (propInfo.m_requireHeightMap)
+                        {
+                            Singleton<TerrainManager>.instance.GetHeightMapping(point.Position, out Texture heightMap, out Vector4 heightMapping, out Vector4 surfaceMapping);
+                            PropInstance.RenderInstance(cameraInfo, propInfo, id, point.Position, scale, point.Rotation, color, RenderManager.DefaultColorLocation, active: true, heightMap, heightMapping, surfaceMapping);
+                        }
+                        else
+                        {
+                            PropInstance.RenderInstance(cameraInfo, propInfo, id, point.Position, scale, point.Rotation, color, RenderManager.DefaultColorLocation, active: true);
+                        }
+                    }
+                }
+                else if (SelectedPrefab is TreeInfo treeInfo)
+                {
+                    Randomizer randomizer = default;
+
+                    // Preview trees.
+                    foreach (PointData point in _propPoints)
+                    {
+                        // Skip blocked points.
+                        if (point.Colliding)
+                        {
+                            continue;
+                        }
+
+                        // Based on game code from TreeTool
+                        uint seed = Singleton<TreeManager>.instance.m_trees.NextFreeItem(ref randomizer);
+                        Randomizer treeRandomizer = new Randomizer(seed);
+                        float scale = treeInfo.m_minScale + (treeRandomizer.Int32(10000u) * (treeInfo.m_maxScale - treeInfo.m_minScale) * 0.0001f);
+                        float brightness = treeInfo.m_minBrightness + (treeRandomizer.Int32(10000u) * (treeInfo.m_maxBrightness - treeInfo.m_minBrightness) * 0.0001f);
+                        TreeInstance.RenderInstance(null, treeInfo, point.Position, scale, brightness, RenderManager.DefaultColorLocation, disableRuined: false);
+                    }
+                }
+                else if (SelectedPrefab is BuildingInfo buildingInfo)
+                {
+                    // Preview buildings.
+                    foreach (PointData point in _propPoints)
+                    {
+                        // Skip blocked points.
+                        if (point.Colliding)
+                        {
+                            continue;
+                        }
+
+                        // Based on game code from BuildingTool.
+                        Building data = default;
+                        data.m_position = point.Position;
+                        data.m_angle = point.Rotation;
+                        m_toolController.RenderCollidingNotifications(cameraInfo, 0, 0);
+                        float elevation = point.Position.y;
+                        Color color = buildingInfo.m_buildingAI.GetColor(0, ref data, Singleton<InfoManager>.instance.CurrentMode, Singleton<InfoManager>.instance.CurrentSubMode);
+                        buildingInfo.m_buildingAI.RenderBuildGeometry(cameraInfo, point.Position, point.Rotation, elevation);
+                        BuildingTool.RenderGeometry(cameraInfo, buildingInfo, 0, point.Position, point.Rotation, radius: true, color);
+                        if (buildingInfo.m_subBuildings != null && buildingInfo.m_subBuildings.Length != 0)
+                        {
+                            Matrix4x4 matrix4x = default(Matrix4x4);
+                            matrix4x.SetTRS(point.Position, Quaternion.AngleAxis(point.Rotation * 57.29578f, Vector3.down), Vector3.one);
+                            for (int i = 0; i < buildingInfo.m_subBuildings.Length; i++)
+                            {
+                                BuildingInfo renderInfo = buildingInfo.m_subBuildings[i].m_buildingInfo;
+                                Vector3 position = matrix4x.MultiplyPoint(buildingInfo.m_subBuildings[i].m_position);
+                                float angle = (buildingInfo.m_subBuildings[i].m_angle * (Mathf.PI / 180f)) + point.Rotation;
+                                Segment3 connectionSegment = default;
+                                renderInfo.m_buildingAI.CheckBuildPositionMainThread(0, ref position, ref angle, 0f, elevation, ref connectionSegment, out var _, out var _);
+                                renderInfo.m_buildingAI.RenderBuildGeometry(cameraInfo, position, angle, elevation);
+                                BuildingTool.RenderGeometry(cameraInfo, renderInfo, 0, position, angle, radius: true, color);
+                            }
+                        }
+                    }
+                }
+            }
+
+            base.RenderGeometry(cameraInfo);
+        }
+
+        /// <summary>
         /// Called by game when overlay is to be rendered.
         /// </summary>
         /// <param name="cameraInfo">Current camera instance.</param>
@@ -356,14 +465,15 @@ namespace LineToolMod
                     ++toolManager.m_drawCallData.m_overlayCalls;
                 }
 
-                // Set color according to stepping mode.
-                Color pointColor = _stepMode ? Color.magenta : Color.green;
-
                 // Remaining points.
                 foreach (PointData point in _propPoints)
                 {
-                    overlay.DrawCircle(cameraInfo, point.Colliding ? Color.red : pointColor, point.Position, 5f, -1024f, 1024f, false, false);
-                    ++toolManager.m_drawCallData.m_overlayCalls;
+                    // Only render where we're not previewing prefabs.
+                    if (_stepMode | point.Colliding)
+                    {
+                        overlay.DrawCircle(cameraInfo, point.Colliding ? Color.red : Color.magenta, point.Position, 5f, -1024f, 1024f, false, false);
+                        ++toolManager.m_drawCallData.m_overlayCalls;
+                    }
                 }
             }
         }

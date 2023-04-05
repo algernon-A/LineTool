@@ -1,3 +1,6 @@
+- Add prefab preview rendering
+
+
 Version 0.1.1 -
 
 - Remove redundant UUI code
