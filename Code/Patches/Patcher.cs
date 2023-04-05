@@ -19,7 +19,7 @@ namespace LineToolMod
         /// <summary>
         /// Applies patches to Find It for prefab selection management.
         /// </summary>
-        public void PatchFindIt()
+        internal void PatchFindIt()
         {
             try
             {

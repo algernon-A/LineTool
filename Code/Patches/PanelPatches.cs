@@ -16,13 +16,13 @@ namespace LineToolMod
     /// </summary>
     [HarmonyPatch]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Harmony")]
-    public static class PanelPatches
+    internal static class PanelPatches
     {
         /// <summary>
         /// Determines list of target methods to patch.
         /// </summary>
         /// <returns>List of target methods to patch.</returns>
-        public static IEnumerable<MethodBase> TargetMethods()
+        internal static IEnumerable<MethodBase> TargetMethods()
         {
             // Vanilla game panels.
             yield return AccessTools.Method(typeof(BeautificationPanel), "OnButtonClicked");
@@ -50,7 +50,7 @@ namespace LineToolMod
         /// Harmony prefix patch to record if the LineTool is active before the base method is executed.
         /// </summary>
         /// <param name="__state">Passthrough to postifx; set to true if the LineTool is active when the target method is called.</param>
-        public static void Prefix(out bool __state)
+        internal static void Prefix(out bool __state)
         {
             __state = LineTool.IsActiveTool;
         }
@@ -59,7 +59,7 @@ namespace LineToolMod
         /// Harmony postifx patch to check to see if LineTool should be restored after the base method is executed.
         /// </summary>
         /// <param name="__state">Passthrough from prefix; set to true if the LineTool is active when the target method is called.</param>
-        public static void Postfix(bool __state)
+        internal static void Postfix(bool __state)
         {
             if (__state)
             {

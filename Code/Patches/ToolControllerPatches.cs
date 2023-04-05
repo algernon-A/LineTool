@@ -13,7 +13,7 @@ namespace LineToolMod
     /// </summary>
     [HarmonyPatch(typeof(ToolController))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Harmony")]
-    public static class ToolControllerPatches
+    internal static class ToolControllerPatches
     {
         /// <summary>
         /// Harmony prefix patch to ToolController.SetTool to record selected prefab from previous tool when switching to LineTool..
@@ -22,7 +22,7 @@ namespace LineToolMod
         /// <param name="tool">Tool being assinged.</param>
         [HarmonyPatch("SetTool")]
         [HarmonyPrefix]
-        public static void SetToolPrefix(ToolController __instance, ToolBase tool)
+        private static void SetToolPrefix(ToolController __instance, ToolBase tool)
         {
             // Look for activation of linetool.
             if (tool is LineTool lineTool)
