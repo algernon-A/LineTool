@@ -7,6 +7,7 @@ namespace LineToolMod
 {
     using System.IO;
     using System.Xml.Serialization;
+    using AlgernonCommons.UI;
     using AlgernonCommons.XML;
 
     /// <summary>
@@ -20,6 +21,16 @@ namespace LineToolMod
         /// </summary>
         [XmlIgnore]
         private static readonly string SettingsFileName = Path.Combine(ColossalFramework.IO.DataLocation.localApplicationData, "LineTool.xml");
+
+        /// <summary>
+        /// Gets or sets the tool options panel's last saved X position.
+        /// </summary>
+        public float PanelXPosition { get => StandalonePanelManager<ToolOptionsPanel>.LastSavedXPosition; set => StandalonePanelManager<ToolOptionsPanel>.LastSavedXPosition = value; }
+
+        /// <summary>
+        /// Gets or sets the tool options panel's last saved Y position.
+        /// </summary>
+        public float PanelYPosition { get => StandalonePanelManager<ToolOptionsPanel>.LastSavedYPosition; set => StandalonePanelManager<ToolOptionsPanel>.LastSavedYPosition = value; }
 
         /// <summary>
         /// Loads settings from file.

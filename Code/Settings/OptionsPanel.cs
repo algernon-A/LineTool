@@ -46,6 +46,10 @@ namespace LineToolMod
             UICheckBox loggingCheck = UICheckBoxes.AddPlainCheckBox(this, LeftMargin, currentY, Translations.Translate("DETAIL_LOGGING"));
             loggingCheck.isChecked = Logging.DetailLogging;
             loggingCheck.eventCheckChanged += (c, isChecked) => { Logging.DetailLogging = isChecked; };
+            currentY += loggingCheck.height + Margin;
+
+            UIButton resetPositionButton = UIButtons.AddButton(this, LeftMargin, currentY, Translations.Translate("RESET_POSITION"), 300f);
+            resetPositionButton.eventClicked += (c, p) => StandalonePanelManager<ToolOptionsPanel>.ResetPosition();
         }
     }
 }

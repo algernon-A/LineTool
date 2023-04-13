@@ -420,7 +420,7 @@ namespace LineToolMod
                         BuildingTool.RenderGeometry(cameraInfo, buildingInfo, 0, point.Position, point.Rotation, radius: true, color);
                         if (buildingInfo.m_subBuildings != null && buildingInfo.m_subBuildings.Length != 0)
                         {
-                            Matrix4x4 matrix4x = default(Matrix4x4);
+                            Matrix4x4 matrix4x = default;
                             matrix4x.SetTRS(point.Position, Quaternion.AngleAxis(point.Rotation * 57.29578f, Vector3.down), Vector3.one);
                             for (int i = 0; i < buildingInfo.m_subBuildings.Length; i++)
                             {

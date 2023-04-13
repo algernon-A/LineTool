@@ -34,6 +34,18 @@ namespace LineToolMod
         public override float PanelHeight => 250f;
 
         /// <summary>
+        /// Gets the panel's default position.
+        /// </summary>
+        public override Vector3 DefaultPosition
+        {
+            get
+            {
+                UIComponent optionsBar = GameObject.Find("OptionsBar").GetComponent<UIComponent>();
+                return optionsBar.absolutePosition - new Vector3(0f, PanelHeight + Margin);
+            }
+        }
+
+        /// <summary>
         /// Gets the panel's title.
         /// </summary>
         protected override string PanelTitle => Translations.Translate("MOD_NAME");
@@ -183,13 +195,26 @@ namespace LineToolMod
         }
 
         /// <summary>
-        /// Gets the panel's default position.
+        /// Applies the panel's default position.
         /// </summary>
         protected override void ApplyDefaultPosition()
         {
-            // Set position.
-            UIComponent optionsBar = GameObject.Find("OptionsBar").GetComponent<UIComponent>();
-            absolutePosition = optionsBar.absolutePosition - new Vector3(0f, PanelHeight + Margin);
+            absolutePosition = DefaultPosition;
+        }
+
+        /// <summary>
+        /// Performs any actions required before closing the panel and checks that it's safe to do so.
+        /// </summary>
+        /// <returns>Always true (panel can always close).</returns>
+        protected override bool PreClose()
+        {
+            // Save panel position if it's not at the default.
+            if (absolutePosition != DefaultPosition)
+            {
+                ModSettings.Save();
+            }
+
+            return true;
         }
 
         /// <summary>
