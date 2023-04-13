@@ -646,6 +646,14 @@ namespace LineToolMod
         /// <param name="e">Event.</param>
         protected override void OnToolGUI(Event e)
         {
+            base.OnToolGUI(e);
+
+            // Don't do anything if inside UI.
+            if (m_toolController.IsInsideUI)
+            {
+                return;
+            }
+
             // Check for escape key.
             if (e.type == EventType.keyDown && e.keyCode == KeyCode.Escape)
             {
@@ -668,8 +676,8 @@ namespace LineToolMod
                     return;
                 }
 
-                // Don't do anything if mouse is inside UI or if there are any errors other than failed raycast.
-                if (m_toolController.IsInsideUI || (m_selectErrors != ToolErrors.None && m_selectErrors != ToolErrors.RaycastFailed))
+                // Don't do anything if there are any errors other than failed raycast.
+                if (m_selectErrors != ToolErrors.None && m_selectErrors != ToolErrors.RaycastFailed)
                 {
                     return;
                 }

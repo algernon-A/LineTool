@@ -255,6 +255,9 @@ namespace LineToolMod
             newSlider.minValue = minValue;
             newSlider.TrueValue = 0f;
 
+            // Ensure value textfield is in front.
+            valueField.BringToFront();
+
             return newSlider;
         }
 
