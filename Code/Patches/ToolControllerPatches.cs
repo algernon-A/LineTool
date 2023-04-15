@@ -22,7 +22,7 @@ namespace LineToolMod
         /// <param name="tool">Tool being assinged.</param>
         [HarmonyPatch("SetTool")]
         [HarmonyPrefix]
-        private static void SetToolPrefix(ToolController __instance, ToolBase tool)
+        internal static void SetToolPrefix(ToolController __instance, ToolBase tool)
         {
             // Look for activation of linetool.
             if (tool is LineTool lineTool)
