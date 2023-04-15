@@ -1,3 +1,8 @@
+Version 0.3.0.1 -
+
+- Fix occasional thread sync issue in RenderGeometry
+
+
 Version 0.3 -
 
 - Fix slider panel dragging offset and textfields not capturing input
