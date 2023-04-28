@@ -14,20 +14,17 @@ namespace LineToolMod
     /// <summary>
     /// The mod's settings options panel.
     /// </summary>
-    public class OptionsPanel : UIPanel
+    public class OptionsPanel : OptionsPanelBase
     {
         // Layout constants.
         private const float Margin = 5f;
         private const float LeftMargin = 24f;
 
         /// <summary>
-        /// Called by Unity before the first frame.
-        /// Used to perform setup.
+        /// Performs on-demand panel setup.
         /// </summary>
-        public override void Start()
+        protected override void Setup()
         {
-            base.Start();
-
             // Add controls.
             // Y position indicator.
             float currentY = Margin;
