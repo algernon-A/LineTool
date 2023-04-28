@@ -1,3 +1,4 @@
+- Add mod conflict detection and notification
 - Update AlgernonCommons
 
 

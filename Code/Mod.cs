@@ -8,6 +8,7 @@ namespace LineToolMod
     using AlgernonCommons;
     using AlgernonCommons.Patching;
     using AlgernonCommons.Translation;
+    using ColossalFramework.Plugins;
     using ICities;
 
     /// <summary>
@@ -29,6 +30,34 @@ namespace LineToolMod
         /// Gets the mod's description for display in the content manager.
         /// </summary>
         public string Description => Translations.Translate("MOD_DESCRIPTION");
+
+        /// <summary>
+        /// Called by the game when the mod is enabled.
+        /// </summary>
+        public override void OnEnabled()
+        {
+            // Perform conflict detection.
+            ConflictDetection conflictDetection = new ConflictDetection();
+            if (conflictDetection.CheckModConflicts())
+            {
+                Logging.Error("aborting activation due to conflicting mods");
+
+                // Load mod settings to ensure that correct language is selected for notification display.
+                LoadSettings();
+
+                // Disable mod.
+                if (AssemblyUtils.ThisPlugin is PluginManager.PluginInfo plugin)
+                {
+                    Logging.KeyMessage("disabling mod");
+                    plugin.isEnabled = false;
+                }
+
+                // Don't do anything further.
+                return;
+            }
+
+            base.OnEnabled();
+        }
 
         /// <summary>
         /// Saves settings file.
