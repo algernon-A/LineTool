@@ -156,13 +156,12 @@ namespace LineToolMod.Modes
                     float finalRotation = rotation;
                     if (rotationMode == RotationMode.Relative)
                     {
-                        // Get start and endpoints of this fence segment.
-                        Vector3 startPoint = _thisBezier.Position(tFactor);
-                        tFactor = BezierStep(tFactor, spacing);
-                        Vector3 endPoint = _thisBezier.Position(tFactor);
+                        // Get the points either side of this gap.
+                        Vector3 prevPoint = _thisBezier.Position(BezierStep(tFactor, -spacing));
+                        Vector3 nextPoint = _thisBezier.Position(BezierStep(tFactor, spacing));
 
                         // Calculate rotation angle.
-                        Vector3 difference = endPoint - startPoint;
+                        Vector3 difference = nextPoint - prevPoint;
                         finalRotation += Mathf.Atan2(difference.z, difference.x);
                     }
 

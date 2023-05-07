@@ -1,3 +1,6 @@
+- Fix double-counting error with curve mode spacing calculation
+
+
 Version 0.4 -
 
 - Add mod conflict detection and notification
