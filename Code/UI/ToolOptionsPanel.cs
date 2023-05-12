@@ -170,6 +170,14 @@ namespace LineToolMod
         }
 
         /// <summary>
+        /// Applies the panel's default position.
+        /// </summary>
+        public override void ApplyDefaultPosition()
+        {
+            absolutePosition = DefaultPosition;
+        }
+
+        /// <summary>
         /// Refreshes the spacing slider's value.
         /// </summary>
         internal void RefreshSpacing() => _spacingSlider.TrueValue = LineTool.Instance.Spacing;
@@ -192,14 +200,6 @@ namespace LineToolMod
                 _skipButton.Disable();
                 _stepButton.Disable();
             }
-        }
-
-        /// <summary>
-        /// Applies the panel's default position.
-        /// </summary>
-        protected override void ApplyDefaultPosition()
-        {
-            absolutePosition = DefaultPosition;
         }
 
         /// <summary>

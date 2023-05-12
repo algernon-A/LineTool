@@ -113,7 +113,7 @@ namespace LineToolMod
         /// <summary>
         /// Gets the panel's default position.
         /// </summary>
-        protected override void ApplyDefaultPosition()
+        public override void ApplyDefaultPosition()
         {
             // Set position.
             UIComponent optionsBar = GameObject.Find("OptionsBar").GetComponent<UIComponent>();
