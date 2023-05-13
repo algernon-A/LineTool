@@ -681,6 +681,22 @@ namespace LineToolMod
         {
             base.OnToolGUI(e);
 
+            // Prcessed 'enter' key to exit locking..
+            bool placing = false;
+            if (_locked && e.type == EventType.KeyUp)
+            {
+                if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
+                {
+                    e.Use();
+                    _locked = false;
+
+                    // Initiate placement.
+                    InitiatePlacement();
+
+                    return;
+                }
+            }
+
             // Don't do anything if inside UI.
             if (m_toolController.IsInsideUI)
             {
@@ -696,7 +712,7 @@ namespace LineToolMod
             }
 
             // Check for mousedown events with button zero.
-            if (e.type == EventType.MouseDown)
+            if (placing || e.type == EventType.MouseDown)
             {
                 // Got one; use the event.
                 UIInput.MouseUsed();
@@ -735,31 +751,40 @@ namespace LineToolMod
                                 return;
                             }
 
-                            // Stepping?
-                            if (StepMode)
-                            {
-                                // Step mode - save end point.
-                                Stepping = true;
-                                _endPos = m_accuratePosition;
-                                _originalRotation = Rotation;
-                            }
-                            else
-                            {
-                                // Not step mode - place all items.
-                                lock (_propPoints)
-                                {
-                                    PointData[] points = new PointData[_propPoints.Count];
-                                    _propPoints.CopyTo(points);
-                                    PrefabInfo selectedPrefab = _selectedPrefab;
-                                    Singleton<SimulationManager>.instance.AddAction(CreateItems(points, selectedPrefab));
-                                }
-
-                                // Mode placement post-processing.
-                                CurrentMode.ItemsPlaced(m_accuratePosition);
-                            }
+                            // Initiate placement.
+                            InitiatePlacement();
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Intitiates item placement.
+        /// </summary>
+        private void InitiatePlacement()
+        {
+            // Stepping?
+            if (StepMode)
+            {
+                // Step mode - save end point.
+                Stepping = true;
+                _endPos = m_accuratePosition;
+                _originalRotation = Rotation;
+            }
+            else
+            {
+                // Not step mode - place all items.
+                lock (_propPoints)
+                {
+                    PointData[] points = new PointData[_propPoints.Count];
+                    _propPoints.CopyTo(points);
+                    PrefabInfo selectedPrefab = _selectedPrefab;
+                    Singleton<SimulationManager>.instance.AddAction(CreateItems(points, selectedPrefab));
+                }
+
+                // Mode placement post-processing.
+                CurrentMode.ItemsPlaced(m_accuratePosition);
             }
         }
 
