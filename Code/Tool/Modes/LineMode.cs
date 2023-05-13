@@ -16,6 +16,9 @@ namespace LineToolMod.Modes
     /// </summary>
     public class LineMode : ToolMode
     {
+        // Calculated bezier.
+        private Bezier3 _thisBezier;
+
         /// <summary>
         /// Renders the overlay for this tool mode.
         /// </summary>
@@ -23,15 +26,23 @@ namespace LineToolMod.Modes
         /// <param name="toolManager">ToolManager instance.</param>
         /// <param name="overlay">Overlay effect instance.</param>
         /// <param name="color">Color to use.</param>
-        /// <param name="mousePosition">Current mouse position.</param>
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 mousePosition)
+        /// <param name="position">Current end position.</param>
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position)
         {
             // Don't render anything if no valid initial point.
             if (m_validStart)
             {
-                // Simple straight line overlay.
-                Segment3 segment = new Segment3(m_startPos, mousePosition);
-                overlay.DrawSegment(cameraInfo, color, segment, 2f, DashLength, -1024f, 1024f, false, false);
+                // Calulate bezier data.
+                Vector3 startDirection = position - m_startPos;
+                startDirection = VectorUtils.NormalizeXZ(startDirection, out float distance);
+                Vector3 endDirection = -startDirection;
+                distance *= 0.15f;
+                Vector3 middlePos1 = m_startPos + (startDirection * distance);
+                Vector3 middlePos2 = position + (endDirection * distance);
+
+                // Draw bezier.
+                _thisBezier = new Bezier3(m_startPos, middlePos1, middlePos2, position);
+                overlay.DrawBezier(cameraInfo, color, _thisBezier, 2f, 0f, 0f, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
         }

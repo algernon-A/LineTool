@@ -184,8 +184,8 @@ namespace LineToolMod.Modes
         /// <param name="toolManager">ToolManager instance.</param>
         /// <param name="overlay">Overlay effect instance.</param>
         /// <param name="color">Color to use.</param>
-        /// <param name="mousePosition">Current mouse position.</param>
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 mousePosition)
+        /// <param name="position">Current end position.</param>
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position)
         {
             // No overlay to render if there isn't a valid starting point.
             if (!m_validStart)
@@ -197,7 +197,7 @@ namespace LineToolMod.Modes
             if (!m_validElbow)
             {
                 // No elbow point yet - just draw initial line.
-                Segment3 segment = new Segment3(m_startPos, mousePosition);
+                Segment3 segment = new Segment3(m_startPos, position);
                 overlay.DrawSegment(cameraInfo, color, segment, 2f, DashLength, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
@@ -205,7 +205,7 @@ namespace LineToolMod.Modes
             {
                 // Valid elbow - draw both lines.
                 Segment3 segment = new Segment3(m_startPos, m_elbowPoint);
-                Segment3 segment2 = new Segment3(m_elbowPoint, mousePosition);
+                Segment3 segment2 = new Segment3(m_elbowPoint, position);
                 overlay.DrawSegment(cameraInfo, color, segment, segment2, 2f, DashLength, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
