@@ -83,6 +83,7 @@ namespace LineToolMod.Modes
             // Update new starting location to the previous end point and clear elbow.
             m_startPos = location;
             m_validElbow = false;
+            m_validBezier = false;
         }
 
         /// <summary>
@@ -182,8 +183,9 @@ namespace LineToolMod.Modes
         /// <param name="cameraInfo">Current camera instance.</param>
         /// <param name="toolManager">ToolManager instance.</param>
         /// <param name="overlay">Overlay effect instance.</param>
+        /// <param name="color">Color to use.</param>
         /// <param name="mousePosition">Current mouse position.</param>
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Vector3 mousePosition)
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 mousePosition)
         {
             // No overlay to render if there isn't a valid starting point.
             if (!m_validStart)
@@ -196,7 +198,7 @@ namespace LineToolMod.Modes
             {
                 // No elbow point yet - just draw initial line.
                 Segment3 segment = new Segment3(m_startPos, mousePosition);
-                overlay.DrawSegment(cameraInfo, Color.magenta, segment, 2f, DashLength, -1024f, 1024f, false, false);
+                overlay.DrawSegment(cameraInfo, color, segment, 2f, DashLength, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
             else
@@ -204,14 +206,14 @@ namespace LineToolMod.Modes
                 // Valid elbow - draw both lines.
                 Segment3 segment = new Segment3(m_startPos, m_elbowPoint);
                 Segment3 segment2 = new Segment3(m_elbowPoint, mousePosition);
-                overlay.DrawSegment(cameraInfo, Color.magenta, segment, segment2, 2f, DashLength, -1024f, 1024f, false, false);
+                overlay.DrawSegment(cameraInfo, color, segment, segment2, 2f, DashLength, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
 
             // Draw bezier overlay if we have a valid bezier to draw.
             if (m_validBezier)
             {
-                overlay.DrawBezier(cameraInfo, Color.magenta, _thisBezier, 2f, 0f, 0f, -1024f, 1024f, false, false);
+                overlay.DrawBezier(cameraInfo, color, _thisBezier, 2f, 0f, 0f, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
         }

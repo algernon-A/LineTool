@@ -22,15 +22,16 @@ namespace LineToolMod.Modes
         /// <param name="cameraInfo">Current camera instance.</param>
         /// <param name="toolManager">ToolManager instance.</param>
         /// <param name="overlay">Overlay effect instance.</param>
+        /// <param name="color">Color to use.</param>
         /// <param name="mousePosition">Current mouse position.</param>
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Vector3 mousePosition)
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 mousePosition)
         {
             // Don't render anything if no valid initial point.
             if (m_validStart)
             {
                 // Simple straight line overlay to show centre and current radius/angle of circle.
                 Segment3 segment = new Segment3(m_startPos, mousePosition);
-                overlay.DrawSegment(cameraInfo, Color.magenta, segment, 2f, DashLength, -1024f, 1024f, false, false);
+                overlay.DrawSegment(cameraInfo, color, segment, 2f, DashLength, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
             }
         }

@@ -25,6 +25,11 @@ namespace LineToolMod
         private readonly List<PointData> _propPoints = new List<PointData>();
         private PrefabInfo _selectedPrefab;
         private Randomizer _randomizer = default;
+        private ToolMode _currentMode = new LineMode();
+
+        // Locking.
+        private bool _locked = false;
+        private Vector3 _lockedPosition;
 
         // Stepping data.
         private Vector3 _endPos;
@@ -88,7 +93,18 @@ namespace LineToolMod
         /// <summary>
         /// Gets or sets the current tool mode.
         /// </summary>
-        public ToolMode CurrentMode { get; set; } = new LineMode();
+        public ToolMode CurrentMode
+        {
+            get => _currentMode;
+
+            set
+            {
+                _currentMode = value;
+
+                // Reset status on mode change.
+                _locked = false;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether fence mode is active.
@@ -274,8 +290,8 @@ namespace LineToolMod
             m_mousePosition = output.m_hitPos;
             m_selectErrors = errors;
 
-            // Calculate points if no errors and no valid end position.
-            if (errors == ToolErrors.None && !_validEndPos)
+            // Calculate points if not locked, or no errors and no valid end position.
+            if (_locked || (errors == ToolErrors.None && !_validEndPos))
             {
                 // Make threadsafe.
                 lock (_propPoints)
@@ -327,7 +343,7 @@ namespace LineToolMod
                     }
 
                     // Calculate points.
-                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, m_accuratePosition, spacing, Rotation, _propPoints, rotationMode);
+                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, _locked ? _lockedPosition : m_accuratePosition, spacing, Rotation, _propPoints, rotationMode);
                 }
             }
         }
@@ -461,8 +477,16 @@ namespace LineToolMod
             ToolManager toolManager = Singleton<ToolManager>.instance;
             OverlayEffect overlay = Singleton<RenderManager>.instance.OverlayEffect;
 
-            // Render either the saved track if applicable, or a new track based on the current position.
-            CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, _validEndPos ? _endPos : m_accuratePosition);
+            // Render the overlay based on locking status.
+            if (_locked)
+            {
+                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, Color.green, _lockedPosition);
+            }
+            else
+            {
+                // Not locked - render either the saved track if applicable, or a new track based on the current position.
+                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, Color.magenta, _validEndPos ? _endPos : m_accuratePosition);
+            }
 
             // Point overlays.
             lock (_propPoints)
@@ -693,11 +717,24 @@ namespace LineToolMod
 
                 if (e.button == 0)
                 {
-                    if (_selectedPrefab != null)
+                    if (_locked)
+                    {
+                        _locked = false;
+                    }
+
+                    // Only perform actions when not locked and there's a valid selected prefab.
+                    if (!_locked && _selectedPrefab != null)
                     {
                         // Handle click via current mode.
                         if (CurrentMode.HandleClick(m_accuratePosition))
                         {
+                            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                            {
+                                _locked = true;
+                                _lockedPosition = m_accuratePosition;
+                                return;
+                            }
+
                             // Stepping?
                             if (StepMode)
                             {

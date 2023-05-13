@@ -86,8 +86,9 @@ namespace LineToolMod.Modes
         /// <param name="cameraInfo">Current camera instance.</param>
         /// <param name="toolManager">ToolManager instance.</param>
         /// <param name="overlay">Overlay effect instance.</param>
-        /// <param name="mousePosition">Current mouse position.</param>
-        public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Vector3 mousePosition);
+        /// <param name="color">Color to use.</param>
+        /// <param name="position">Current end position.</param>
+        public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position);
 
         /// <summary>
         /// Calculates the points to use based on this mode.
