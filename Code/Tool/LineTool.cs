@@ -480,12 +480,12 @@ namespace LineToolMod
             // Render the overlay based on locking status.
             if (_locked)
             {
-                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, Color.green, _lockedPosition);
+                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, Color.green, _lockedPosition, false);
             }
             else
             {
                 // Not locked - render either the saved track if applicable, or a new track based on the current position.
-                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, Color.magenta, _validEndPos ? _endPos : m_accuratePosition);
+                CurrentMode.RenderOverlay(cameraInfo, toolManager, overlay, Color.magenta, _validEndPos ? _endPos : m_accuratePosition, true);
             }
 
             // Point overlays.

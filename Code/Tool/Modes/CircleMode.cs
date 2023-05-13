@@ -24,10 +24,11 @@ namespace LineToolMod.Modes
         /// <param name="overlay">Overlay effect instance.</param>
         /// <param name="color">Color to use.</param>
         /// <param name="position">Current end position.</param>
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position)
+        /// <param name="drawGuides">Indicates whether to draw guide lines.</param>
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position, bool drawGuides)
         {
             // Don't render anything if no valid initial point.
-            if (m_validStart)
+            if (m_validStart && drawGuides)
             {
                 // Simple straight line overlay to show centre and current radius/angle of circle.
                 Segment3 segment = new Segment3(m_startPos, position);

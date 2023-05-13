@@ -185,7 +185,8 @@ namespace LineToolMod.Modes
         /// <param name="overlay">Overlay effect instance.</param>
         /// <param name="color">Color to use.</param>
         /// <param name="position">Current end position.</param>
-        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position)
+        /// <param name="drawGuides">Indicates whether to draw guide lines.</param>
+        public override void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position, bool drawGuides)
         {
             // No overlay to render if there isn't a valid starting point.
             if (!m_validStart)
@@ -194,20 +195,23 @@ namespace LineToolMod.Modes
             }
 
             // Draw line guides.
-            if (!m_validElbow)
+            if (drawGuides)
             {
-                // No elbow point yet - just draw initial line.
-                Segment3 segment = new Segment3(m_startPos, position);
-                overlay.DrawSegment(cameraInfo, color, segment, 2f, DashLength, -1024f, 1024f, false, false);
-                ++toolManager.m_drawCallData.m_overlayCalls;
-            }
-            else
-            {
-                // Valid elbow - draw both lines.
-                Segment3 segment = new Segment3(m_startPos, m_elbowPoint);
-                Segment3 segment2 = new Segment3(m_elbowPoint, position);
-                overlay.DrawSegment(cameraInfo, color, segment, segment2, 2f, DashLength, -1024f, 1024f, false, false);
-                ++toolManager.m_drawCallData.m_overlayCalls;
+                if (!m_validElbow)
+                {
+                    // No elbow point yet - just draw initial line.
+                    Segment3 segment = new Segment3(m_startPos, position);
+                    overlay.DrawSegment(cameraInfo, color, segment, 2f, DashLength, -1024f, 1024f, false, false);
+                    ++toolManager.m_drawCallData.m_overlayCalls;
+                }
+                else
+                {
+                    // Valid elbow - draw both lines.
+                    Segment3 segment = new Segment3(m_startPos, m_elbowPoint);
+                    Segment3 segment2 = new Segment3(m_elbowPoint, position);
+                    overlay.DrawSegment(cameraInfo, color, segment, segment2, 2f, DashLength, -1024f, 1024f, false, false);
+                    ++toolManager.m_drawCallData.m_overlayCalls;
+                }
             }
 
             // Draw bezier overlay if we have a valid bezier to draw.

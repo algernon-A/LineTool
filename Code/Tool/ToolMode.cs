@@ -88,7 +88,8 @@ namespace LineToolMod.Modes
         /// <param name="overlay">Overlay effect instance.</param>
         /// <param name="color">Color to use.</param>
         /// <param name="position">Current end position.</param>
-        public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position);
+        /// <param name="drawGuides">Indicates whether to draw guide lines.</param>
+        public abstract void RenderOverlay(RenderManager.CameraInfo cameraInfo, ToolManager toolManager, OverlayEffect overlay, Color color, Vector3 position, bool drawGuides);
 
         /// <summary>
         /// Calculates the points to use based on this mode.
