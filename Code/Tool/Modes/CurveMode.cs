@@ -41,9 +41,16 @@ namespace LineToolMod.Modes
         /// </summary>
         public override void Reset()
         {
-            base.Reset();
+            // Only clear elbow if we have one.
+            if (m_validElbow)
+            {
+                m_validElbow = false;
+            }
+            else
+            {
+                base.Reset();
+            }
 
-            m_validElbow = false;
             m_validBezier = false;
         }
 

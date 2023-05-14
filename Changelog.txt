@@ -1,5 +1,6 @@
 - Add ability to lock a line to adjust settings before final placement (ctrl-click)
 - Change line mode overlay to segment bezier to match curved mode
+- Right-clicking in curve mode when elbow point is placed only cancels elbow point
 
 
 Version 0.4.0.1 -
