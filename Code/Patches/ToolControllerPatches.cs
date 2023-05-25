@@ -16,7 +16,7 @@ namespace LineToolMod
     internal static class ToolControllerPatches
     {
         /// <summary>
-        /// Harmony prefix patch to ToolController.SetTool to record selected prefab from previous tool when switching to LineTool..
+        /// Harmony prefix patch to ToolController.SetTool to record selected prefab from previous tool when switching to LineTool.
         /// </summary>
         /// <param name="__instance">ToolController instance (from original instance call).</param>
         /// <param name="tool">Tool being assinged.</param>
