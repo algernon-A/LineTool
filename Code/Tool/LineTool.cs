@@ -26,6 +26,7 @@ namespace LineToolMod
         private PrefabInfo _selectedPrefab;
         private Randomizer _randomizer = default;
         private ToolMode _currentMode = new LineMode();
+        private bool _fenceMode = false;
 
         // Locking.
         private bool _locked = false;
@@ -109,7 +110,25 @@ namespace LineToolMod
         /// <summary>
         /// Gets or sets a value indicating whether fence mode is active.
         /// </summary>
-        public bool FenceMode { get; set; } = false;
+        public bool FenceMode
+        {
+            get => _fenceMode;
+
+            set
+            {
+                // Don't do anything if no change.
+                if (value != _fenceMode)
+                {
+                    _fenceMode = value;
+
+                    // Set initial spacing if fence mode has just been activated.
+                    if (value)
+                    {
+                        SetFenceSpacing();
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether step mode is active.
@@ -147,7 +166,16 @@ namespace LineToolMod
         {
             get => _selectedPrefab;
 
-            set => _selectedPrefab = value;
+            set
+            {
+                _selectedPrefab = value;
+
+                // Reset calculated spacing if we're in fence mode.
+                if (FenceMode)
+                {
+                    SetFenceSpacing();
+                }
+            }
         }
 
         /// <summary>
@@ -299,8 +327,7 @@ namespace LineToolMod
                     // Clear list.
                     _propPoints.Clear();
 
-                    // Set default spacing and rotation.
-                    float spacing = Spacing;
+                    // Set default rotation.
                     RotationMode rotationMode = RelativeRotation ? RotationMode.Relative : RotationMode.Fixed;
 
                     // Fence mode calculations (overrides spacing and rotation mode).
@@ -314,12 +341,10 @@ namespace LineToolMod
 
                             if (xSize > zSize)
                             {
-                                spacing = xSize;
                                 rotationMode = RotationMode.FenceAlignedX;
                             }
                             else
                             {
-                                spacing = zSize;
                                 rotationMode = RotationMode.FenceAlignedZ;
                             }
                         }
@@ -331,19 +356,17 @@ namespace LineToolMod
 
                             if (xSize > zSize)
                             {
-                                spacing = xSize;
                                 rotationMode = RotationMode.FenceAlignedX;
                             }
                             else
                             {
-                                spacing = zSize;
                                 rotationMode = RotationMode.FenceAlignedZ;
                             }
                         }
                     }
 
                     // Calculate points.
-                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, _locked ? _lockedPosition : m_accuratePosition, spacing, Rotation, _propPoints, rotationMode);
+                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, _locked ? _lockedPosition : m_accuratePosition, Spacing, Rotation, _propPoints, rotationMode);
                 }
             }
         }
@@ -1022,6 +1045,43 @@ namespace LineToolMod
                             }
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets fence mode spacing to the relevant dimension size.
+        /// </summary>
+        private void SetFenceSpacing()
+        {
+            if (SelectedPrefab is PropInfo prop)
+            {
+                // Prop fence mode.
+                float xSize = prop.m_mesh.bounds.extents.x * 2f;
+                float zSize = prop.m_mesh.bounds.extents.z * 2f;
+
+                if (xSize > zSize)
+                {
+                    SetToWidth();
+                }
+                else
+                {
+                    SetToLength();
+                }
+            }
+            else if (SelectedPrefab is BuildingInfo building)
+            {
+                // Building fence mode.
+                float xSize = building.m_mesh.bounds.extents.x * 2f;
+                float zSize = building.m_mesh.bounds.extents.z * 2f;
+
+                if (xSize > zSize)
+                {
+                    SetToWidth();
+                }
+                else
+                {
+                    SetToLength();
                 }
             }
         }

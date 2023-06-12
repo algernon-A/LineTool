@@ -1,3 +1,6 @@
+- Add adjustable spacing to fence mode
+
+
 Version 0.5 -
 
 - Add ability to lock a line to adjust settings before final placement (ctrl-click)
