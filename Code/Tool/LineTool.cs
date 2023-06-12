@@ -27,6 +27,7 @@ namespace LineToolMod
         private Randomizer _randomizer = default;
         private ToolMode _currentMode = new LineMode();
         private bool _fenceMode = false;
+        private float _spacing = 10f;
 
         // Locking.
         private bool _locked = false;
@@ -84,7 +85,18 @@ namespace LineToolMod
         /// <summary>
         /// Gets or sets the line spacing.
         /// </summary>
-        public float Spacing { get; set; } = 10f;
+        public float Spacing
+        {
+            get => _spacing;
+
+            set
+            {
+                _spacing = value;
+
+                // Update options panel.
+                StandalonePanelManager<ToolOptionsPanel>.Panel?.RefreshSpacing();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the rotation setting.
@@ -551,9 +563,6 @@ namespace LineToolMod
             {
                 Spacing = building.GetLength() * 8f;
             }
-
-            // Update options panel.
-            StandalonePanelManager<ToolOptionsPanel>.Panel?.RefreshSpacing();
         }
 
         /// <summary>
@@ -573,9 +582,6 @@ namespace LineToolMod
             {
                 Spacing = building.GetWidth() * 8f;
             }
-
-            // Update options panel.
-            StandalonePanelManager<ToolOptionsPanel>.Panel?.RefreshSpacing();
         }
 
         /// <summary>
