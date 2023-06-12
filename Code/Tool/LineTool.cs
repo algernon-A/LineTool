@@ -363,10 +363,7 @@ namespace LineToolMod
                         else if (SelectedPrefab is BuildingInfo building)
                         {
                             // Building fence mode.
-                            float xSize = building.m_mesh.bounds.extents.x * 2f;
-                            float zSize = building.m_mesh.bounds.extents.z * 2f;
-
-                            if (xSize > zSize)
+                            if (building.GetWidth() > building.GetLength())
                             {
                                 rotationMode = RotationMode.FenceAlignedX;
                             }
@@ -1078,10 +1075,7 @@ namespace LineToolMod
             else if (SelectedPrefab is BuildingInfo building)
             {
                 // Building fence mode.
-                float xSize = building.m_mesh.bounds.extents.x * 2f;
-                float zSize = building.m_mesh.bounds.extents.z * 2f;
-
-                if (xSize > zSize)
+                if (building.GetWidth() > building.GetLength())
                 {
                     SetToWidth();
                 }
