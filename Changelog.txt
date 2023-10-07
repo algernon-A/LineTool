@@ -1,3 +1,6 @@
+- Add overlapping end item for fence mode
+
+
 Version 0.6 -
 
 - Add adjustable spacing to fence mode

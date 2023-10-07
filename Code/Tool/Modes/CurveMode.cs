@@ -69,7 +69,7 @@ namespace LineToolMod.Modes
                 return false;
             }
 
-            // Othwerwise, if no valid elbow point, record this as the elbow point.
+            // Otherwise, if no valid elbow point, record this as the elbow point.
             if (!m_validElbow)
             {
                 m_elbowPoint = location;
@@ -96,7 +96,7 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
-        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="toolController">Tool controller reference.</param>
         /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
@@ -111,13 +111,13 @@ namespace LineToolMod.Modes
                 return;
             }
 
-            // Calulate angles.
+            // Calculate angles.
             Vector3 direction1 = m_elbowPoint - m_startPos;
             direction1.Normalize();
             Vector3 direction2 = m_elbowPoint - currentPos;
             direction2.Normalize();
 
-            // Create bezier.
+            // Create Bezier.
             NetSegment.CalculateMiddlePoints(m_startPos, direction1, currentPos, direction2, false, false, out Vector3 middlePos1, out Vector3 middlePos2);
             _thisBezier = new Bezier3(m_startPos, middlePos1, middlePos2, currentPos);
             m_validBezier = true;
@@ -125,7 +125,7 @@ namespace LineToolMod.Modes
             // Local reference.
             TerrainManager terrainManager = Singleton<TerrainManager>.instance;
 
-            // Calculate points along bezier.
+            // Calculate points along Bezier.
             float tFactor = 0f;
             toolController.BeginColliding(out ulong[] collidingSegments, out ulong[] collidingBuildings);
             if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)

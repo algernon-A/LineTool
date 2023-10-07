@@ -16,7 +16,7 @@ namespace LineToolMod.Modes
     /// </summary>
     public class LineMode : ToolMode
     {
-        // Calculated bezier.
+        // Calculated Bezier.
         private Bezier3 _thisBezier;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace LineToolMod.Modes
             // Don't render anything if no valid initial point.
             if (m_validStart)
             {
-                // Calulate bezier data.
+                // Calculate Bezier data.
                 Vector3 startDirection = position - m_startPos;
                 startDirection = VectorUtils.NormalizeXZ(startDirection, out float distance);
                 Vector3 endDirection = -startDirection;
@@ -41,7 +41,7 @@ namespace LineToolMod.Modes
                 Vector3 middlePos1 = m_startPos + (startDirection * distance);
                 Vector3 middlePos2 = position + (endDirection * distance);
 
-                // Draw bezier.
+                // Draw Bezier.
                 _thisBezier = new Bezier3(m_startPos, middlePos1, middlePos2, position);
                 overlay.DrawBezier(cameraInfo, color, _thisBezier, 2f, 0f, 0f, -1024f, 1024f, false, false);
                 ++toolManager.m_drawCallData.m_overlayCalls;
@@ -51,7 +51,7 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
-        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="toolController">Tool controller reference.</param>
         /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
@@ -97,14 +97,18 @@ namespace LineToolMod.Modes
             float currentDistance = 0f;
 
             // Offset start position for fence mode.
-            if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
+            bool fenceMode = rotationMode == RotationMode.FenceAlignedX | rotationMode == RotationMode.FenceAlignedZ;
+            if (fenceMode)
             {
                 currentDistance = spacing / 2f;
             }
 
+            // Calculate ending magnitude (for fence mode, final position is brought in by half-length).
+            float endMagnitude = magnitude - currentDistance;
+
             // Create points.
             toolController.BeginColliding(out ulong[] collidingSegments, out ulong[] collidingBuildings);
-            while (currentDistance < magnitude)
+            while (currentDistance < endMagnitude)
             {
                 // Interpolate position.
                 float lerpFactor = currentDistance / magnitude;
@@ -116,6 +120,15 @@ namespace LineToolMod.Modes
                 // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, thisPoint, collidingSegments, collidingBuildings) });
                 currentDistance += spacing;
+
+                // Add final point for fence mode.
+                if (fenceMode && currentDistance >= endMagnitude)
+                {
+                    lerpFactor = endMagnitude / magnitude;
+                    thisPoint = Vector3.Lerp(m_startPos, currentPos, lerpFactor);
+
+                    pointList.Add(new PointData { Position = thisPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, thisPoint, collidingSegments, collidingBuildings) });
+                }
             }
 
             toolController.EndColliding();
