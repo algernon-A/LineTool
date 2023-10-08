@@ -18,7 +18,7 @@ namespace LineToolMod
     using TreeInstance = global::TreeInstance;
 
     /// <summary>
-    /// The line tool itslef.
+    /// The line tool itself.
     /// </summary>
     public class LineTool : DefaultTool
     {
@@ -40,7 +40,7 @@ namespace LineToolMod
         private bool _stepMode = false;
         private int _stepIndex = 0;
 
-        // Building height offset modifer.
+        // Building height offset modifier.
         private float _heightOffset = 0.001f;
 
         // Building completed delegate.
@@ -224,7 +224,7 @@ namespace LineToolMod
         }
 
         /// <summary>
-        /// Sets vehicle ingore flags to ignore all vehicles.
+        /// Sets vehicle ignore flags to ignore all vehicles.
         /// </summary>
         /// <returns>Vehicle flags ignoring all vehicles.</returns>
         public override Vehicle.Flags GetVehicleIgnoreFlags() =>
@@ -680,7 +680,7 @@ namespace LineToolMod
             // Make sure that game is loaded before activating tool.
             if (!Loading.IsLoaded)
             {
-                // Loading not complete - deactivate tool by seting default tool.
+                // Loading not complete - deactivate tool by setting default tool.
                 ToolsModifierControl.SetTool<DefaultTool>();
                 return;
             }
@@ -707,7 +707,7 @@ namespace LineToolMod
         {
             base.OnToolGUI(e);
 
-            // Prcessed 'enter' key to exit locking..
+            // Processed 'enter' key to exit locking..
             bool placing = false;
             if (_locked && e.type == EventType.KeyUp)
             {
@@ -786,7 +786,7 @@ namespace LineToolMod
         }
 
         /// <summary>
-        /// Intitiates item placement.
+        /// Initiates item placement.
         /// </summary>
         private void InitiatePlacement()
         {
@@ -906,7 +906,7 @@ namespace LineToolMod
         /// Based on game code.
         /// </summary>
         /// <param name="prop">Prop prefab.</param>
-        /// <param name="position">Postion.</param>
+        /// <param name="position">Prop position.</param>
         /// <param name="rotation">Prop rotation (in degrees).</param>
         private void CreateProp(PropInfo prop, Vector3 position, float rotation)
         {
@@ -930,7 +930,7 @@ namespace LineToolMod
         /// Based on game code.
         /// </summary>
         /// <param name="tree">Tree prefab.</param>
-        /// <param name="position">Postion.</param>
+        /// <param name="position">Tree position.</param>
         private void CreateTree(TreeInfo tree, Vector3 position)
         {
             // Check construction cost.
@@ -954,7 +954,7 @@ namespace LineToolMod
         /// </summary>
         /// <param name="building">Building prefab.</param>
         /// <param name="position">Building position.</param>
-        /// <param name="angle">Bulding angle.</param>
+        /// <param name="angle">Building angle.</param>
         private void CreateBuilding(BuildingInfo building, Vector3 position, float angle)
         {
             // Effective prefab (may be overwritten).
