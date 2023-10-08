@@ -128,9 +128,14 @@ namespace LineToolMod.Modes
             // Calculate points along Bezier.
             float tFactor = 0f;
             toolController.BeginColliding(out ulong[] collidingSegments, out ulong[] collidingBuildings);
+
+            // Check for fence mode.
             if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
             {
-                // Fence mode.
+                // Fence mode - calculate rotation offset.
+                float rotationOffset = rotationMode == RotationMode.FenceAlignedZ ? Mathf.PI / 2f : 0f;
+
+                // Iterate through all points.
                 bool done = false;
                 while (!done)
                 {
@@ -154,7 +159,7 @@ namespace LineToolMod.Modes
 
                     // Calculate rotation angle.
                     Vector3 difference = endPoint - startPoint;
-                    float finalRotation = Mathf.Atan2(difference.z, difference.x);
+                    float finalRotation = Mathf.Atan2(difference.z, difference.x) - rotationOffset;
 
                     // Calculate midpoint (prop placement point) and get terrain height.
                     Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
@@ -184,7 +189,7 @@ namespace LineToolMod.Modes
 
                         // Calculate rotation angle.
                         Vector3 difference = nextPoint - prevPoint;
-                        finalRotation += Mathf.Atan2(difference.z, difference.x) + 90;
+                        finalRotation += Mathf.Atan2(difference.z, difference.x);
                     }
 
                     // Add point to list.
