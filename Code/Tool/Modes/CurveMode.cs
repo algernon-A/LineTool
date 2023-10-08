@@ -131,46 +131,37 @@ namespace LineToolMod.Modes
             if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
             {
                 // Fence mode.
-                while (true)
+                bool done = false;
+                while (!done)
                 {
                     // Get start and endpoints of this fence segment.
+                    Vector3 endPoint;
                     Vector3 startPoint = _thisBezier.Position(tFactor);
                     tFactor = BezierStep(tFactor, spacing);
 
                     // Keep iterating until we reach the end.
                     if (tFactor < 1.0f)
                     {
-                        Vector3 endPoint = _thisBezier.Position(tFactor);
-
-                        // Calculate rotation angle.
-                        Vector3 difference = endPoint - startPoint;
-                        float finalRotation = Mathf.Atan2(difference.z, difference.x);
-
-                        // Calculate midpoint (prop placement point) and get terrain height.
-                        Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
-                        midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
-
-                        // Add point to list.
-                        pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
+                        endPoint = _thisBezier.Position(tFactor);
                     }
                     else
                     {
-                        // End reached - calculate final item.
-                        Vector3 endPoint = _thisBezier.Position(1.0f);
+                        // End reached - calculate final (overlapping) item.
+                        endPoint = _thisBezier.Position(1.0f);
                         tFactor = BezierStepReverse(spacing);
-                        startPoint = _thisBezier.Position(tFactor);
-
-                        // Calculate rotation angle.
-                        Vector3 difference = endPoint - startPoint;
-                        float finalRotation = Mathf.Atan2(difference.z, difference.x);
-
-                        // Calculate midpoint (prop placement point) and get terrain height.
-                        Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
-                        midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
-
-                        pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
-                        break;
+                        done = true;
                     }
+
+                    // Calculate rotation angle.
+                    Vector3 difference = endPoint - startPoint;
+                    float finalRotation = Mathf.Atan2(difference.z, difference.x);
+
+                    // Calculate midpoint (prop placement point) and get terrain height.
+                    Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
+                    midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
+
+                    // Add point to list.
+                    pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
                 }
             }
             else
