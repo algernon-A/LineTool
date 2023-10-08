@@ -22,7 +22,7 @@ namespace LineToolMod
         // Panel components.
         private UIMultiStateButton _optionsPanelToggle;
 
-        // Tool selection indicies.
+        // Tool selection indices.
         private enum ModeIndexes : int
         {
             None = -1,

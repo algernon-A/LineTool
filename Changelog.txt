@@ -1,4 +1,5 @@
 - Add overlapping end item for fence mode
+- Add shortcut buttons to rotate 90 and 180 degrees
 
 
 Version 0.6 -

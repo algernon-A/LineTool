@@ -31,7 +31,7 @@ namespace LineToolMod
         /// <summary>
         /// Gets the panel height.
         /// </summary>
-        public override float PanelHeight => 250f;
+        public override float PanelHeight => 300f;
 
         /// <summary>
         /// Gets the panel's default position.
@@ -95,6 +95,19 @@ namespace LineToolMod
             widthButton.relativePosition = new Vector2((ToggleSize + DoubleMargin) * 3f, currentY);
             widthButton.eventClicked += (c, p) => LineTool.Instance?.SetToWidth();
             widthButton.tooltip = Translations.Translate("SET_WIDTH");
+
+            currentY += ToggleSize + Margin;
+
+            // Flip buttons.
+            UIMultiStateButton flip90Button = AddToggleButton(this, "Flip90", toggleAtlas, ToggleSize);
+            flip90Button.relativePosition = new Vector2(Margin, currentY);
+            flip90Button.eventActiveStateIndexChanged += (c, state) => LineTool.Instance.Flip90 = state != 0;
+            flip90Button.tooltip = Translations.Translate("FLIP_90");
+
+            UIMultiStateButton flip180Button = AddToggleButton(this, "Flip180", toggleAtlas, ToggleSize);
+            flip180Button.relativePosition = new Vector2(Margin + ToggleSize + Margin, currentY);
+            flip180Button.eventActiveStateIndexChanged += (c, state) => LineTool.Instance.Flip180 = state != 0;
+            flip180Button.tooltip = Translations.Translate("FLIP_180");
 
             currentY += ToggleSize + Margin + Margin;
 
@@ -308,7 +321,7 @@ namespace LineToolMod
             // State 0 background.
             UIMultiStateButton.SpriteSet bgSpriteSetZero = bgSpriteSetState[0];
             bgSpriteSetZero.normal = spriteName;
-            bgSpriteSetZero.focused = spriteName + "Pressed";
+            bgSpriteSetZero.focused = spriteName;
             bgSpriteSetZero.hovered = spriteName + "Hovered";
             bgSpriteSetZero.pressed = spriteName + "Pressed";
             bgSpriteSetZero.disabled = spriteName;

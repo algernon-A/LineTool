@@ -94,7 +94,7 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
-        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="toolController">Tool controller reference.</param>
         /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>
@@ -110,7 +110,7 @@ namespace LineToolMod.Modes
         /// <param name="position">Position to check.</param>
         /// <param name="collidingSegments">Colliding segments array.</param>
         /// <param name="collidingBuildings">Colliding buildings array.</param>
-        /// <returns>True if the position has a collision for the selected prefab, false othewise.</returns>
+        /// <returns><c>true</c> if the position has a collision for the selected prefab, <c>false</c> otherwise.</returns>
         protected bool CheckCollision(PrefabInfo prefab, Vector3 position, ulong[] collidingSegments, ulong[] collidingBuildings)
         {
             if (prefab is PropInfo prop)

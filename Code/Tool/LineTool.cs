@@ -104,6 +104,16 @@ namespace LineToolMod
         public float Rotation { get; set; } = 0f;
 
         /// <summary>
+        /// Gets or sets a value indicating whether rotation should be flipped 90 degrees.
+        /// </summary>
+        public bool Flip90 { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether rotation should be flipped 180 degrees.
+        /// </summary>
+        public bool Flip180 { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the current tool mode.
         /// </summary>
         public ToolMode CurrentMode
@@ -222,6 +232,11 @@ namespace LineToolMod
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the effective current rotation (custom rotation setting plus any applicable flip toggles).
+        /// </summary>
+        private float EffectiveRotation => Rotation + (Flip90 ? Mathf.PI / 2f : 0f) + (Flip180 ? Mathf.PI : 0f);
 
         /// <summary>
         /// Sets vehicle ignore flags to ignore all vehicles.
@@ -375,7 +390,7 @@ namespace LineToolMod
                     }
 
                     // Calculate points.
-                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, _locked ? _lockedPosition : m_accuratePosition, Spacing, Rotation, _propPoints, rotationMode);
+                    CurrentMode?.CalculatePoints(m_toolController, _selectedPrefab, _locked ? _lockedPosition : m_accuratePosition, Spacing, EffectiveRotation, _propPoints, rotationMode);
                 }
             }
         }
@@ -796,7 +811,7 @@ namespace LineToolMod
                 // Step mode - save end point.
                 Stepping = true;
                 _endPos = m_accuratePosition;
-                _originalRotation = Rotation;
+                _originalRotation = EffectiveRotation;
             }
             else
             {
@@ -877,7 +892,7 @@ namespace LineToolMod
                     if (!point.Colliding)
                     {
                         // Check any rotation delta.
-                        float rotationDelta = Rotation - _originalRotation;
+                        float rotationDelta = EffectiveRotation - _originalRotation;
 
                         if (_selectedPrefab is PropInfo prop)
                         {
