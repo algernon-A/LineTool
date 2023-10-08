@@ -33,7 +33,7 @@ namespace LineToolMod.Modes
         /// </summary>
         protected internal Vector3 m_elbowPoint;
 
-        // Calculated bezier.
+        // Calculated Bezier.
         private Bezier3 _thisBezier;
 
         /// <summary>
@@ -131,23 +131,46 @@ namespace LineToolMod.Modes
             if (rotationMode == RotationMode.FenceAlignedX || rotationMode == RotationMode.FenceAlignedZ)
             {
                 // Fence mode.
-                while (tFactor <= 1.0f)
+                while (true)
                 {
                     // Get start and endpoints of this fence segment.
                     Vector3 startPoint = _thisBezier.Position(tFactor);
                     tFactor = BezierStep(tFactor, spacing);
-                    Vector3 endPoint = _thisBezier.Position(tFactor);
 
-                    // Calculate rotation angle.
-                    Vector3 difference = endPoint - startPoint;
-                    float finalRotation = Mathf.Atan2(difference.z, difference.x);
+                    // Keep iterating until we reach the end.
+                    if (tFactor < 1.0f)
+                    {
+                        Vector3 endPoint = _thisBezier.Position(tFactor);
 
-                    // Calculate midpoint (prop placement point) and get terrain height.
-                    Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
-                    midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
+                        // Calculate rotation angle.
+                        Vector3 difference = endPoint - startPoint;
+                        float finalRotation = Mathf.Atan2(difference.z, difference.x);
 
-                    // Add point to list.
-                    pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
+                        // Calculate midpoint (prop placement point) and get terrain height.
+                        Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
+                        midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
+
+                        // Add point to list.
+                        pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
+                    }
+                    else
+                    {
+                        // End reached - calculate final item.
+                        Vector3 endPoint = _thisBezier.Position(1.0f);
+                        tFactor = BezierStepReverse(spacing);
+                        startPoint = _thisBezier.Position(tFactor);
+
+                        // Calculate rotation angle.
+                        Vector3 difference = endPoint - startPoint;
+                        float finalRotation = Mathf.Atan2(difference.z, difference.x);
+
+                        // Calculate midpoint (prop placement point) and get terrain height.
+                        Vector3 midPoint = new Vector3(endPoint.x - (difference.x / 2f), 0f, endPoint.z - (difference.z / 2f));
+                        midPoint.y = terrainManager.SampleDetailHeight(midPoint, out float _, out float _);
+
+                        pointList.Add(new PointData { Position = midPoint, Rotation = finalRotation, Colliding = CheckCollision(prefab, midPoint, collidingSegments, collidingBuildings) });
+                        break;
+                    }
                 }
             }
             else
@@ -170,7 +193,7 @@ namespace LineToolMod.Modes
 
                         // Calculate rotation angle.
                         Vector3 difference = nextPoint - prevPoint;
-                        finalRotation += Mathf.Atan2(difference.z, difference.x);
+                        finalRotation += Mathf.Atan2(difference.z, difference.x) + 90;
                     }
 
                     // Add point to list.
@@ -221,7 +244,7 @@ namespace LineToolMod.Modes
                 }
             }
 
-            // Draw bezier overlay if we have a valid bezier to draw.
+            // Draw Bezier overlay if we have a valid Bezier to draw.
             if (m_validBezier)
             {
                 overlay.DrawBezier(cameraInfo, color, _thisBezier, 2f, 0f, 0f, -1024f, 1024f, false, false);
@@ -230,32 +253,63 @@ namespace LineToolMod.Modes
         }
 
         /// <summary>
-        /// Steps along a bezier calculating the target t factor for the given starting t factor and the current spacing setting.
+        /// Steps along a Bezier calculating the target t factor for the given starting t factor and the given distance.
         /// Code based on Alterran's PropLineTool (StepDistanceCurve, Utilities/PLTMath.cs).
         /// </summary>
         /// <param name="tStart">Starting t factor.</param>
-        /// <param name="spacing">Spacing setting.</param>
+        /// <param name="distance">Distance to travel.</param>
         /// <returns>Target t factor.</returns>
-        private float BezierStep(float tStart, float spacing)
+        private float BezierStep(float tStart, float distance)
         {
             const float Tolerance = 0.001f;
             const float ToleranceSquared = Tolerance * Tolerance;
 
-            float tEnd = _thisBezier.Travel(tStart, spacing);
+            float tEnd = _thisBezier.Travel(tStart, distance);
             float usedDistance = CubicBezierArcLengthXZGauss04(tStart, tEnd);
 
             // Twelve iteration maximum for performance and to prevent infinite loops.
             for (int i = 0; i < 12; ++i)
             {
                 // Stop looping if the remaining distance is less than tolerance.
-                float remainingDistance = spacing - usedDistance;
+                float remainingDistance = distance - usedDistance;
                 if (remainingDistance * remainingDistance < ToleranceSquared)
                 {
                     break;
                 }
 
                 usedDistance = CubicBezierArcLengthXZGauss04(tStart, tEnd);
-                tEnd += (spacing - usedDistance) / CubicSpeedXZ(tEnd);
+                tEnd += (distance - usedDistance) / CubicSpeedXZ(tEnd);
+            }
+
+            return tEnd;
+        }
+
+        /// <summary>
+        /// Steps along a Bezier BACKWARDS from the end point, calculating the target t factor for the given spacing distance.
+        /// Code based on Alterran's PropLineTool (StepDistanceCurve, Utilities/PLTMath.cs).
+        /// </summary>
+        /// <param name="distance">Distance to travel.</param>
+        /// <returns>Target t factor.</returns>
+        private float BezierStepReverse(float distance)
+        {
+            const float Tolerance = 0.001f;
+            const float ToleranceSquared = Tolerance * Tolerance;
+
+            float tEnd = _thisBezier.Travel(1, -distance);
+            float usedDistance = CubicBezierArcLengthXZGauss04(tEnd, 1.0f);
+
+            // Twelve iteration maximum for performance and to prevent infinite loops.
+            for (int i = 0; i < 12; ++i)
+            {
+                // Stop looping if the remaining distance is less than tolerance.
+                float remainingDistance = distance - usedDistance;
+                if (remainingDistance * remainingDistance < ToleranceSquared)
+                {
+                    break;
+                }
+
+                usedDistance = CubicBezierArcLengthXZGauss04(tEnd, 1.0f);
+                tEnd -= (distance - usedDistance) / CubicSpeedXZ(tEnd);
             }
 
             return tEnd;
@@ -263,7 +317,7 @@ namespace LineToolMod.Modes
 
         /// <summary>
         /// From Alterann's PropLineTool (CubicSpeedXZ, Utilities/PLTMath.cs).
-        /// Returns the integrand of the arc length function for a cubic bezier curve, constrained to the XZ-plane at a specific t.
+        /// Returns the integrand of the arc length function for a cubic Bezier curve, constrained to the XZ-plane at a specific t.
         /// </summary>
         /// <param name="t"> t factor.</param>
         /// <returns>Integrand of arc length.</returns>
@@ -279,7 +333,7 @@ namespace LineToolMod.Modes
 
         /// <summary>
         /// From Alterann's PropLineTool (CubicBezierArcLengthXZGauss04, Utilities/PLTMath.cs).
-        /// Returns the XZ arclength of a cubic bezier curve between two t factors.
+        /// Returns the XZ arclength of a cubic Bezier curve between two t factors.
         /// Uses Gauss–Legendre Quadrature with n = 4.
         /// </summary>
         /// <param name="t1">Starting t factor.</param>
