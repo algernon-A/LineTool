@@ -23,7 +23,7 @@ namespace LineToolMod
         private UITextField _valueTextField;
 
         /// <summary>
-        /// Value changed event (includes true value, i.e. value changes beyond the visibile range that won't trigger the default slider OnValueChanged event).
+        /// Value changed event (includes true value, i.e. value changes beyond the visible range that won't trigger the default slider OnValueChanged event).
         /// </summary>
         public event PropertyChangedEventHandler<float> EventTrueValueChanged;
 
@@ -33,7 +33,7 @@ namespace LineToolMod
         public bool IsInt { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the slider range should be limited to the visisble slider range (default false).
+        /// Gets or sets a value indicating whether the slider range should be limited to the visible slider range (default false).
         /// </summary>
         public bool LimitToVisible { get; set; } = false;
 
@@ -82,7 +82,7 @@ namespace LineToolMod
                 // Set value according to 'limit to visible' setting
                 trueValue = LimitToVisible ? visibleValue : value;
 
-                // Set slider and textfield values (visble and true values accordingly), suppressing events if they aren't already suppressed.
+                // Set slider and textfield values (visible and true values accordingly), suppressing events if they aren't already suppressed.
                 bool oldSuppressEvents = suppressEvents;
                 suppressEvents = true;
                 this.value = visibleValue;
@@ -125,21 +125,22 @@ namespace LineToolMod
         {
             get
             {
-                // Integer or float?
-                if (!IsInt)
+                // Shift key for range.
+                if (!IsInt && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
                 {
-                    if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-                    {
-                        // Control modifier.
-                        return 0.01f;
-                    }
+                    // Control modifier.
+                    return 10f;
+                }
 
-                    // Default float multiplier.
+                // Control key for precision.
+                if (!IsInt && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+                {
+                    // Control modifier.
                     return 0.1f;
                 }
 
                 // Default multiplier.
-                return 1;
+                return 1f;
             }
         }
 
