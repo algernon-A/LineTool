@@ -22,6 +22,8 @@ namespace LineToolMod
         private UIButton _skipButton;
         private UIMultiStateButton _relativeAngleButton;
         private UIMultiStateButton _absoluteAngleButton;
+        private UIMultiStateButton _flip90Button;
+        private UIMultiStateButton _flip180Button;
 
         /// <summary>
         /// Gets the panel width.
@@ -99,15 +101,15 @@ namespace LineToolMod
             currentY += ToggleSize + Margin;
 
             // Flip buttons.
-            UIMultiStateButton flip90Button = AddToggleButton(this, "Flip90", toggleAtlas, ToggleSize);
-            flip90Button.relativePosition = new Vector2(Margin, currentY);
-            flip90Button.eventActiveStateIndexChanged += (c, state) => LineTool.Instance.Flip90 = state != 0;
-            flip90Button.tooltip = Translations.Translate("FLIP_90");
+            _flip90Button = AddToggleButton(this, "Flip90", toggleAtlas, ToggleSize);
+            _flip90Button.relativePosition = new Vector2(Margin, currentY);
+            _flip90Button.eventActiveStateIndexChanged += (c, state) => Flip90StateChange(state);
+            _flip90Button.tooltip = Translations.Translate("FLIP_90");
 
-            UIMultiStateButton flip180Button = AddToggleButton(this, "Flip180", toggleAtlas, ToggleSize);
-            flip180Button.relativePosition = new Vector2(Margin + ToggleSize + Margin, currentY);
-            flip180Button.eventActiveStateIndexChanged += (c, state) => LineTool.Instance.Flip180 = state != 0;
-            flip180Button.tooltip = Translations.Translate("FLIP_180");
+            _flip180Button = AddToggleButton(this, "Flip180", toggleAtlas, ToggleSize);
+            _flip180Button.relativePosition = new Vector2(Margin + ToggleSize + Margin, currentY);
+            _flip180Button.eventActiveStateIndexChanged += (c, state) => Flip180StateChange(state);
+            _flip180Button.tooltip = Translations.Translate("FLIP_180");
 
             currentY += ToggleSize + Margin + Margin;
 
@@ -146,37 +148,9 @@ namespace LineToolMod
                 _absoluteAngleButton.activeStateIndex = 1;
             }
 
-            // Absolute angle toggle event handler.
-            _absoluteAngleButton.eventActiveStateIndexChanged += (c, state) =>
-            {
-                if (state == 1)
-                {
-                    // Deselect relative angle toggle if this is selected.
-                    _relativeAngleButton.activeStateIndex = 0;
-                    LineTool.Instance.RelativeRotation = false;
-                }
-                else if (_relativeAngleButton.activeStateIndex == 0)
-                {
-                    // If relative angle button is not selected, force this one active.
-                    _absoluteAngleButton.activeStateIndex = 1;
-                }
-            };
-
-            // Relative angle toggle event handler.
-            _relativeAngleButton.eventActiveStateIndexChanged += (c, state) =>
-            {
-                if (state == 1)
-                {
-                    // Deselect absolute angle toggle if this is selected.
-                    _absoluteAngleButton.activeStateIndex = 0;
-                    LineTool.Instance.RelativeRotation = true;
-                }
-                else if (_absoluteAngleButton.activeStateIndex == 0)
-                {
-                    // If absolute angle button is not selected, force this one active.
-                    _relativeAngleButton.activeStateIndex = 1;
-                }
-            };
+            // Angle toggle event handlers.
+            _absoluteAngleButton.eventActiveStateIndexChanged += (c, state) => AbsoluteAngleStateChange(state);
+            _relativeAngleButton.eventActiveStateIndexChanged += (c, state) => RelativeAngleStateChange(state);
 
             // Set initial state.
             UpdateButtonStates();
@@ -228,6 +202,74 @@ namespace LineToolMod
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Absolute angle toggle event state change handler.
+        /// </summary>
+        /// <param name="state">New state index.</param>
+        private void AbsoluteAngleStateChange(int state)
+        {
+            if (state == 1)
+            {
+                // Deselect relative angle toggle if this is selected.
+                _relativeAngleButton.activeStateIndex = 0;
+                LineTool.Instance.RelativeRotation = false;
+            }
+            else if (_relativeAngleButton.activeStateIndex == 0)
+            {
+                // If relative angle button is not selected, force this one active.
+                _absoluteAngleButton.activeStateIndex = 1;
+            }
+        }
+
+        /// <summary>
+        /// Relative angle toggle event state change handler.
+        /// </summary>
+        /// <param name="state">New state index.</param>
+        private void RelativeAngleStateChange(int state)
+        {
+            if (state == 1)
+            {
+                // Deselect absolute angle toggle if this is selected.
+                _absoluteAngleButton.activeStateIndex = 0;
+                LineTool.Instance.RelativeRotation = true;
+            }
+            else if (_absoluteAngleButton.activeStateIndex == 0)
+            {
+                // If absolute angle button is not selected, force this one active.
+                _relativeAngleButton.activeStateIndex = 1;
+            }
+        }
+
+        /// <summary>
+        /// Flip 90 toggle event state change handler.
+        /// </summary>
+        /// <param name="state">New state index.</param>
+        private void Flip90StateChange(int state)
+        {
+            LineTool.Instance.Flip90 = state != 0;
+
+            // If shift isn't held down and this is now active, unselect 'flip 180'.
+            if (state == 1 && !(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+            {
+                _flip180Button.activeStateIndex = 0;
+            }
+        }
+
+        /// <summary>
+        /// Flip 180 angle toggle event state change handler.
+        /// </summary>
+        /// <param name="state">New state index.</param>
+        private void Flip180StateChange(int state)
+        {
+            LineTool.Instance.Flip180 = state != 0;
+
+            // If shift isn't held down and this is now active, unselect 'flip 90'.
+            if (state == 1 && !(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+            {
+                _flip90Button.activeStateIndex = 0;
+            }
         }
 
         /// <summary>
