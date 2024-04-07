@@ -1,3 +1,5 @@
+Version 0.7.1 -
+
 - Change slider text entry field to accept two decimal places by default
 
 
