@@ -291,7 +291,7 @@ namespace LineToolMod
             const float ValueY = 3f;
             const float LabelY = -13f;
             const float SliderHeight = 18f;
-            const float FloatTextFieldWidth = 45f;
+            const float FloatTextFieldWidth = 55f;
             const float IntTextFieldWidth = 38f;
 
             // Slider control.

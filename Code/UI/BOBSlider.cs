@@ -22,6 +22,9 @@ namespace LineToolMod
         // Linked slider value textfield.
         private UITextField _valueTextField;
 
+        // Overrides decimal point precision when values have been manually entered by textfield.
+        private float _manualPrecision = -1f;
+
         /// <summary>
         /// Value changed event (includes true value, i.e. value changes beyond the visible range that won't trigger the default slider OnValueChanged event).
         /// </summary>
@@ -125,6 +128,12 @@ namespace LineToolMod
         {
             get
             {
+                // Return manual precision if set.
+                if (!(_manualPrecision < 0f))
+                {
+                    return _manualPrecision;
+                }
+
                 // Shift key for range.
                 if (!IsInt && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
                 {
@@ -216,8 +225,31 @@ namespace LineToolMod
                 // Attempt to parse textfield value.
                 if (float.TryParse(text, out float result))
                 {
-                    // Successful parse - set slider value.
-                    TrueValue = result.RoundToNearest(0.01f);
+                    // Successful parse - calculate manual precision.
+                    int decimalPlace = text.IndexOf('.');
+                    if (decimalPlace >= 0)
+                    {
+                        // Use number of chars to right of decimal place to determine precision.
+                        int precision = text.Length - decimalPlace - 1;
+                        switch (precision)
+                        {
+                            case 0:
+                                _manualPrecision = 1f;
+                                break;
+                            case 1:
+                                _manualPrecision = 0.1f;
+                                break;
+                            case 2:
+                            default:
+                                _manualPrecision = 0.01f;
+                                break;
+                        }
+                    }
+
+                    TrueValue = result.RoundToNearest(Multiplier);
+
+                    // Reset manual precision after adjustment.
+                    _manualPrecision = -1f;
                 }
 
                 // Restore event handling.
