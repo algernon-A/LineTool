@@ -40,7 +40,7 @@ namespace LineToolMod.Modes
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
-        /// <param name="toolController">Tool controller refernce.</param>
+        /// <param name="toolController">Tool controller reference.</param>
         /// <param name="prefab">Currently selected prefab.</param>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacing">Spacing setting.</param>

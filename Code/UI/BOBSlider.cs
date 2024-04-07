@@ -217,7 +217,7 @@ namespace LineToolMod
                 if (float.TryParse(text, out float result))
                 {
                     // Successful parse - set slider value.
-                    TrueValue = result.RoundToNearest(Multiplier);
+                    TrueValue = result.RoundToNearest(0.01f);
                 }
 
                 // Restore event handling.

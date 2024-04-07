@@ -22,7 +22,7 @@ namespace LineToolMod
         public override string BaseName => "Line Tool";
 
         /// <summary>
-        /// Gets the mod's unique Harmony identfier.
+        /// Gets the mod's unique Harmony identifier.
         /// </summary>
         public override string HarmonyID => "com.github.algernon-A.csl.linetool";
 

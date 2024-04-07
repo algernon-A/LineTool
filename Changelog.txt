@@ -1,3 +1,6 @@
+- Change slider text entry field to accept two decimal places by default
+
+
 Version 0.7 -
 
 - Add overlapping end item for fence mode
